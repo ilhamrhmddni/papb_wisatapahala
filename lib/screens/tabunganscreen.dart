@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wisatapahala/models/paketumrohmodel.dart';
+import 'package:wisatapahala/screens/addtabunganscreen.dart';
 import 'package:wisatapahala/services/tabunganservice.dart';
 
 class TabunganUmrohScreen extends StatefulWidget {
@@ -15,12 +16,13 @@ class TabunganUmrohScreen extends StatefulWidget {
 class _TabunganUmrohScreenState extends State<TabunganUmrohScreen> {
   int tabunganSaatIni = 0;
   List<int> riwayatTabungan = [];
-  TabunganController tabunganController = TabunganController();
+  late TabunganController tabunganController;
   late SharedPreferences prefs;
 
   @override
   void initState() {
     super.initState();
+    tabunganController = TabunganController(widget.paketUmroh.id);
     _loadTabunganSaatIni();
     _loadRiwayatTabungan();
   }
@@ -35,50 +37,69 @@ class _TabunganUmrohScreenState extends State<TabunganUmrohScreen> {
   Future<void> _loadRiwayatTabungan() async {
     riwayatTabungan = await tabunganController.loadRiwayatTabungan();
   }
-  
-  // Metode tambahkanTabungan dan _showTargetReachedDialog tetap sama seperti sebelumnya
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Kelola Tabungan'),
-        automaticallyImplyLeading: false,
+        leading: IconButton(
+          onPressed: () {
+            // Tambahkan logika ketika tombol hamburger menu ditekan di sini
+          },
+          icon: Icon(Icons.menu),
+        ),
+        actions: <Widget>[
+          IconButton(
+            onPressed: _onBackPressed,
+            icon: Icon(Icons.autorenew),
+          ),
+        ],
       ),
+      floatingActionButton: Padding(
+        padding: EdgeInsets.only(
+            bottom: 16), // Menambahkan padding sebesar 16 pada semua sisi
+        child: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AddTabunganScreen(),
+              ),
+            );
+          },
+          backgroundColor: Colors.green,
+          child: Icon(Icons.add),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(
-              'Tabungan Saat Ini: $tabunganSaatIni',
-              style: TextStyle(fontSize: 18),
-            ),
-            SizedBox(height: 10),
-            Text(
-              'Target Tabungan: ${widget.paketUmroh.harga}',
-              style: TextStyle(fontSize: 18),
-            ),
-            SizedBox(height: 20),
-            TextField(
-              controller: tabunganController.controller,
-              decoration: InputDecoration(
-                labelText: 'Masukkan Jumlah Tabungan Saat Ini',
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.grey,
+                ),
+                borderRadius: BorderRadius.circular(5),
               ),
-              keyboardType: TextInputType.number,
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () async {
-                setState(() {
-                  tabunganSaatIni = tabunganController.tambahkanTabungan(tabunganSaatIni);
-                });
-                await tabunganController.saveTabunganSaatIni(tabunganSaatIni);
-                if (tabunganSaatIni >= widget.paketUmroh.harga) {
-                  _showTargetReachedDialog(context);
-                }
-              },
-              child: Text('Tambah Tabungan'),
+              padding: EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    'Tabungan Saat Ini: $tabunganSaatIni',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    'Target Tabungan: ${widget.paketUmroh.harga}',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                ],
+              ),
             ),
             SizedBox(height: 20),
             Text(
@@ -103,23 +124,24 @@ class _TabunganUmrohScreenState extends State<TabunganUmrohScreen> {
     );
   }
 
-  void _showTargetReachedDialog(BuildContext context) {
-    showDialog(
+  Future<void> _onBackPressed() async {
+    return await showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Target Tabungan Tercapai'),
-          content: Text('Anda telah mencapai target tabungan untuk Umrah.'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('OK'),
-            ),
-          ],
-        );
-      },
+      builder: (context) => AlertDialog(
+        title: Text('Mengganti Tabungan'),
+        content:
+            Text('Apakah Anda yakin ingin mengganti tabungan pilihan anda?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('Tidak'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text('Ya'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -129,4 +151,3 @@ class _TabunganUmrohScreenState extends State<TabunganUmrohScreen> {
     super.dispose();
   }
 }
-

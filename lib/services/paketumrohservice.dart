@@ -1,33 +1,27 @@
-import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:wisatapahala/models/paketumrohmodel.dart';
 
 class PaketUmrohController {
-  // Method untuk memilih paket umroh
-  static Future<void> selectPaketUmroh(String paketUmrohId) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('selectedPaketUmrohId', paketUmrohId);
-  }
+  static final String apiUrl = 'https://papb-wisatapahala-be.vercel.app/packages';
 
-  // Method untuk mendapatkan paket umroh yang telah dipilih sebelumnya
-  static Future<String?> getSelectedPaketUmroh() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString('selectedPaketUmrohId');
-  }
+  // Constructor untuk menetapkan userId
+  final String userId;
+  PaketUmrohController(this.userId);
 
-  // Metode untuk mendapatkan detail paket umroh berdasarkan ID
-  static Future<PaketUmroh> getPaketUmrohById(String paketUmrohId) async {
-    // Di sini Anda dapat mengganti logika untuk mengambil detail paket umroh dari sumber data yang sesuai, seperti database atau API
-    // Misalnya, Anda dapat menggunakan metode dari service atau repository untuk mengambil data paket umroh dari server atau penyimpanan lokal
-    // Di bawah ini hanya contoh sederhana
-
-    // Contoh detail paket umroh
-    PaketUmroh paketUmroh = PaketUmroh(
-      id: paketUmrohId,
-      nama: 'Paket Umroh',
-      harga: 10000000, // Contoh harga dalam rupiahContoh durasi dalam hari
-    );
-
-    // Mengembalikan objek paket umroh
-    return paketUmroh;
+  // Method untuk mendapatkan paket umroh berdasarkan ID
+  Future<PaketUmroh?> getPaketUmrohById(String paketUmrohId) async {
+    try {
+      final response = await http.get(Uri.parse('$apiUrl/$paketUmrohId/$userId'));
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        return PaketUmroh.fromJson(jsonData);
+      } else {
+        return null;
+      }
+    } catch (e) {
+      print('Error: $e');
+      return null;
+    }
   }
 }

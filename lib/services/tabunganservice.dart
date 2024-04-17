@@ -1,17 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class TabunganController {
   TextEditingController controller = TextEditingController();
   List<int> riwayatPenambahanTabungan = [];
+  
+  late String userId; // Id pengguna yang digunakan untuk identifikasi di database
+  late String id; // Id untuk digunakan dalam URL API
+  static final String apiUrl = 'https://papb-wisatapahala-be.vercel.app/savings/users/'; // Ganti dengan URL API tabungan
 
-  // Method untuk menyimpan riwayat tabungan
+  // Constructor dengan parameter userId
+  TabunganController(this.userId) {
+    id = userId;
+  }
+
   Future<void> saveRiwayatTabungan(List<int> riwayat) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('riwayatTabungan', riwayat.map((e) => e.toString()).toList());
   }
 
-  // Method untuk memuat riwayat tabungan
   Future<List<int>> loadRiwayatTabungan() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String>? riwayat = prefs.getStringList('riwayatTabungan');
@@ -32,15 +41,37 @@ class TabunganController {
     return prefs.getInt('tabungan') ?? 0;
   }
 
-  int tambahkanTabungan(int tabunganSaatIni) {
+  Future<void> tambahkanTabungan(int tabunganSaatIni) async {
     int tambahan = int.tryParse(controller.text) ?? 0;
     if (tambahan > 0) {
       riwayatPenambahanTabungan.add(tambahan);
       tabunganSaatIni += tambahan;
       controller.clear();
-      saveTabunganSaatIni(tabunganSaatIni); // Simpan data tabungan setiap kali ditambahkan
-      saveRiwayatTabungan(riwayatPenambahanTabungan); // Simpan riwayat penambahan tabungan
+      saveTabunganSaatIni(tabunganSaatIni);
+      saveRiwayatTabungan(riwayatPenambahanTabungan);
+      // Sinkronisasi dengan database
+      await updateTabungan(tabunganSaatIni, riwayatPenambahanTabungan);
     }
-    return tabunganSaatIni;
+  }
+
+  Future<void> updateTabungan(int tabungan, List<int> riwayat) async {
+    try {
+      final response = await http.put(
+        Uri.parse('$apiUrl$id'),
+        body: {
+          'tabungan': tabungan.toString(),
+          'riwayat': json.encode(riwayat), // Menyimpan riwayat sebagai JSON string
+        },
+      );
+      if (response.statusCode == 200) {
+        // Berhasil menyimpan data ke database
+        print('Data tabungan berhasil disinkronkan dengan database');
+      } else {
+        // Gagal menyimpan data ke database
+        print('Gagal menyinkronkan data tabungan dengan database');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
   }
 }

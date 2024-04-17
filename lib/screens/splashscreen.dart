@@ -6,21 +6,10 @@ import 'package:wisatapahala/services/paketumrohservice.dart';
 import 'package:wisatapahala/services/userservice.dart';
 import 'package:wisatapahala/screens/loginscreen.dart';
 
-class SplashScreen extends StatelessWidget {
- final List<PaketUmroh> daftarPaketUmroh = [
-    PaketUmroh(
-      id: '1',
-      nama: 'Paket Umroh Mekah 10 Hari',
-      harga: 15000000,
-    ),
-    PaketUmroh(
-      id: '2',
-      nama: 'Paket Umroh Madinah 14 Hari',
-      harga: 18000000,
-    ),
-    // Tambahkan paket umroh lainnya sesuai kebutuhan
-  ]; 
+// Anda perlu mendapatkan userId dari mana pun Anda menyimpannya, misalnya dari Shared Preferences
+String userId = 'user_id'; // Gantilah 'user_id' dengan cara Anda mendapatkan userId
 
+class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -30,24 +19,20 @@ class SplashScreen extends StatelessWidget {
           return CircularProgressIndicator();
         } else {
           if (snapshot.data == true) {
+            // Buat instance dari PaketUmrohController dengan memberikan userId
+            PaketUmrohController paketUmrohController = PaketUmrohController(userId);
+
             return FutureBuilder(
-              future: PaketUmrohController.getSelectedPaketUmroh(),
-              builder: (context, AsyncSnapshot<String?> snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
+              future: paketUmrohController.getPaketUmrohById('default_id'), // Gunakan ID default atau sesuaikan dengan logika aplikasi Anda
+              builder: (context, AsyncSnapshot<PaketUmroh?> snapshotPaket) {
+                if (snapshotPaket.connectionState == ConnectionState.waiting) {
                   return CircularProgressIndicator();
                 } else {
-                  if (snapshot.data != null) {
-                    return FutureBuilder(
-                      future: PaketUmrohController.getPaketUmrohById(snapshot.data!),
-                      builder: (context, AsyncSnapshot<PaketUmroh> snapshotPaket) {
-                        if (snapshotPaket.connectionState == ConnectionState.waiting) {
-                          return CircularProgressIndicator();
-                        } else {
-                          return TabunganUmrohScreen(daftarPaketUmroh as PaketUmroh); // Anda mungkin ingin menambahkan argumen di sini jika diperlukan
-                        }
-                      },
-                    );
+                  if (snapshotPaket.hasData && snapshotPaket.data != null) {
+                    // Jika data tersedia, navigasi ke TabunganUmrohScreen
+                    return TabunganUmrohScreen(snapshotPaket.data!);
                   } else {
+                    // Jika data tidak tersedia atau terjadi kesalahan, navigasi ke HomeScreen
                     return HomeScreen();
                   }
                 }
