@@ -1,45 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:wisatapahala/models/paketumrohmodel.dart';
-import 'package:wisatapahala/screens/homescreen.dart';
-import 'package:wisatapahala/screens/tabunganscreen.dart';
-import 'package:wisatapahala/services/paketumrohservice.dart';
 import 'package:wisatapahala/services/userservice.dart';
 import 'package:wisatapahala/screens/loginscreen.dart';
-
-// Anda perlu mendapatkan userId dari mana pun Anda menyimpannya, misalnya dari Shared Preferences
-String userId = 'user_id'; // Gantilah 'user_id' dengan cara Anda mendapatkan userId
+import 'package:wisatapahala/screens/homescreen.dart';
 
 class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: UserController.isLoggedIn(),
-      builder: (context, AsyncSnapshot<bool> snapshot) {
+    return FutureBuilder<String?>(
+      future: UserService.isLoggedIn(), // Menggunakan Future<String?>
+      builder: (context, AsyncSnapshot<String?> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return CircularProgressIndicator();
         } else {
-          if (snapshot.data == true) {
-            // Buat instance dari PaketUmrohController dengan memberikan userId
-            PaketUmrohController paketUmrohController = PaketUmrohController(userId);
-
-            return FutureBuilder(
-              future: paketUmrohController.getPaketUmrohById('default_id'), // Gunakan ID default atau sesuaikan dengan logika aplikasi Anda
-              builder: (context, AsyncSnapshot<PaketUmroh?> snapshotPaket) {
-                if (snapshotPaket.connectionState == ConnectionState.waiting) {
+          if (snapshot.data != null) {
+            return FutureBuilder<bool>(
+              future: UserService.checkLoginStatus(), // Menggunakan Future<bool>
+              builder: (context, AsyncSnapshot<bool> userIdSnapshot) {
+                if (userIdSnapshot.connectionState == ConnectionState.waiting) {
                   return CircularProgressIndicator();
                 } else {
-                  if (snapshotPaket.hasData && snapshotPaket.data != null) {
-                    // Jika data tersedia, navigasi ke TabunganUmrohScreen
-                    return TabunganUmrohScreen(snapshotPaket.data!);
+                  if (userIdSnapshot.hasData && userIdSnapshot.data!) {
+                    return HomeScreen(); // Navigasi ke HomeScreen jika pengguna sudah masuk
                   } else {
-                    // Jika data tidak tersedia atau terjadi kesalahan, navigasi ke HomeScreen
-                    return HomeScreen();
+                    return LoginScreen(); // Navigasi ke LoginScreen jika pengguna belum masuk
                   }
                 }
               },
             );
           } else {
-            return LoginScreen();
+            return LoginScreen(); // Navigasi ke LoginScreen jika pengguna belum masuk
           }
         }
       },

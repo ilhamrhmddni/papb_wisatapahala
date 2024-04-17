@@ -9,11 +9,12 @@ class TabunganController {
   
   late String userId; // Id pengguna yang digunakan untuk identifikasi di database
   late String id; // Id untuk digunakan dalam URL API
-  static final String apiUrl = 'https://papb-wisatapahala-be.vercel.app/savings/users/'; // Ganti dengan URL API tabungan
+  late String apiUrl; // URL API tabungan
 
-  // Constructor dengan parameter userId
-  TabunganController(this.userId) {
-    id = userId;
+  TabunganController(String userId, String id) {
+    this.userId = userId;
+    this.id = id;
+    this.apiUrl = 'https://papb-wisatapahala-be.vercel.app/savings/users/$id';
   }
 
   Future<void> saveRiwayatTabungan(List<int> riwayat) async {

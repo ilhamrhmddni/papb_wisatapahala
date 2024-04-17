@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wisatapahala/models/paketumrohmodel.dart';
 import 'package:wisatapahala/screens/addtabunganscreen.dart';
+import 'package:wisatapahala/screens/splashscreen.dart';
 import 'package:wisatapahala/services/tabunganservice.dart';
 
 class TabunganUmrohScreen extends StatefulWidget {
@@ -18,11 +19,12 @@ class _TabunganUmrohScreenState extends State<TabunganUmrohScreen> {
   List<int> riwayatTabungan = [];
   late TabunganController tabunganController;
   late SharedPreferences prefs;
+  late String userId;
 
   @override
   void initState() {
     super.initState();
-    tabunganController = TabunganController(widget.paketUmroh.id);
+    tabunganController = TabunganController(userId, widget.paketUmroh.id);
     _loadTabunganSaatIni();
     _loadRiwayatTabungan();
   }
@@ -44,11 +46,11 @@ class _TabunganUmrohScreenState extends State<TabunganUmrohScreen> {
       appBar: AppBar(
         title: Text('Kelola Tabungan'),
         leading: IconButton(
-          onPressed: () {
-            // Tambahkan logika ketika tombol hamburger menu ditekan di sini
-          },
-          icon: Icon(Icons.menu),
-        ),
+    onPressed: () {
+      // Tambahkan logika ketika tombol hamburger menu ditekan di sini
+    },
+    icon: Icon(Icons.menu),
+  ),
         actions: <Widget>[
           IconButton(
             onPressed: _onBackPressed,
@@ -57,8 +59,7 @@ class _TabunganUmrohScreenState extends State<TabunganUmrohScreen> {
         ],
       ),
       floatingActionButton: Padding(
-        padding: EdgeInsets.only(
-            bottom: 16), // Menambahkan padding sebesar 16 pada semua sisi
+        padding: EdgeInsets.only(bottom: 16), // Menambahkan padding sebesar 16 pada semua sisi
         child: FloatingActionButton(
           onPressed: () {
             Navigator.push(
