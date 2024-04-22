@@ -9,11 +9,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Aplikasi Tabungan Umroh',
-      theme: ThemeData(
-        primarySwatch: Colors.blue, 
-      ),
       home: SplashScreen(),
-    );
+    ); 
   }
 }

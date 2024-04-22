@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wisatapahala/models/paketumrohmodel.dart';
 import 'package:wisatapahala/screens/addtabunganscreen.dart';
-import 'package:wisatapahala/screens/splashscreen.dart';
 import 'package:wisatapahala/services/tabunganservice.dart';
 
 class TabunganUmrohScreen extends StatefulWidget {
@@ -17,20 +16,28 @@ class TabunganUmrohScreen extends StatefulWidget {
 class _TabunganUmrohScreenState extends State<TabunganUmrohScreen> {
   int tabunganSaatIni = 0;
   List<int> riwayatTabungan = [];
-  late TabunganController tabunganController;
+  late TabunganController tabunganController; // Menambahkan late modifier
   late SharedPreferences prefs;
-  late String userId;
+  late String id;
 
   @override
   void initState() {
     super.initState();
-    tabunganController = TabunganController(userId, widget.paketUmroh.id);
+    // Mendapatkan ID pengguna atau ID unik lainnya
+    _loadUserId(); // Memanggil fungsi untuk mendapatkan ID pengguna
+  }
+
+  Future<void> _loadUserId() async {
+    // Mendapatkan ID pengguna dari SharedPreferences atau layanan autentikasi
+    prefs = await SharedPreferences.getInstance();
+    id = prefs.getString('userId') ?? ''; // Mendapatkan ID pengguna dari SharedPreferences
+    tabunganController = TabunganController(id, widget.paketUmroh.id);
+    // Setelah variabel tabunganController diinisialisasi, panggil metode untuk memuat data lainnya
     _loadTabunganSaatIni();
     _loadRiwayatTabungan();
   }
 
   Future<void> _loadTabunganSaatIni() async {
-    prefs = await SharedPreferences.getInstance();
     setState(() {
       tabunganSaatIni = prefs.getInt('tabunganSaatIni') ?? 0;
     });
@@ -46,11 +53,11 @@ class _TabunganUmrohScreenState extends State<TabunganUmrohScreen> {
       appBar: AppBar(
         title: Text('Kelola Tabungan'),
         leading: IconButton(
-    onPressed: () {
-      // Tambahkan logika ketika tombol hamburger menu ditekan di sini
-    },
-    icon: Icon(Icons.menu),
-  ),
+          onPressed: () {
+            // Tambahkan logika ketika tombol hamburger menu ditekan di sini
+          },
+          icon: Icon(Icons.menu),
+        ),
         actions: <Widget>[
           IconButton(
             onPressed: _onBackPressed,

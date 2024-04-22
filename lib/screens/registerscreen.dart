@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wisatapahala/services/userservice.dart';
+import 'package:wisatapahala/screens/loginscreen.dart';
 
 class RegisterScreen extends StatelessWidget {
   final TextEditingController _usernameController = TextEditingController();
@@ -10,13 +11,18 @@ class RegisterScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Register'),
+        automaticallyImplyLeading: false,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            Text(
+              'Register',
+              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 20),
             TextField(
               controller: _usernameController,
               decoration: InputDecoration(
@@ -66,6 +72,18 @@ class RegisterScreen extends StatelessWidget {
               child: Text('Register'),
             ),
           ],
+        ),
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16.0),
+        child: TextButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => LoginScreen()),
+            );
+          },
+          child: Text('Sudah punya akun? Masuk di sini'),
         ),
       ),
     );
