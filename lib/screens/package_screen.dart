@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:wisatapahala/services/paketumrohservice.dart';
-import 'package:wisatapahala/models/paketumrohmodel.dart';
-import 'package:wisatapahala/screens/tabunganscreen.dart'; // Import the tabungan umroh screen
-import 'package:wisatapahala/widgets/paketumrohwidget.dart';
+import 'package:wisatapahala/services/package_service.dart';
+import 'package:wisatapahala/models/package_model.dart';
+import 'package:wisatapahala/screens/saving_screen.dart'; // Import the tabungan umroh screen
+import 'package:wisatapahala/widgets/package_widget.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 
-class HomeScreen extends StatelessWidget {
+class PackageScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<String>(
@@ -49,15 +49,15 @@ class HomeScreen extends StatelessWidget {
         title: Text('Pilih Paket'),
         automaticallyImplyLeading: false,
       ),
-      body: FutureBuilder<List<PaketUmroh>>(
-        future: PaketUmrohService.getPaketUmrohList(),
+      body: FutureBuilder<List<PackageModel>>(
+        future: PackageService.getPaketUmrohList(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else {
-            List<PaketUmroh> daftarPaketUmroh = snapshot.data ?? [];
+            List<PackageModel> daftarPaketUmroh = snapshot.data ?? [];
             if (daftarPaketUmroh.isEmpty) {
               return Center(child: Text('Paket belum tersedia'));
             } else {
@@ -65,21 +65,22 @@ class HomeScreen extends StatelessWidget {
                 itemCount: daftarPaketUmroh.length,
                 itemBuilder: (context, index) {
                   final paketUmroh = daftarPaketUmroh[index];
-                  return PaketUmrohCard(
+                  return PackageWidget(
                     paketUmroh: paketUmroh,
                     onTap: () async {
+                      print(paketUmroh);
                       // _getUserId;
                       bool? confirmed = await _showConfirmationDialog(context, paketUmroh);
                       if (confirmed != null && confirmed) {
-                        await PaketUmrohService.saveSelectedPackageIdToUserApi(
+                        await PackageService.saveSelectedPackageIdToUserApi(
                           userId: userId,
-                          id_package: paketUmroh.id,
+                          idPackage: paketUmroh.id,
                         );
-                        await PaketUmrohService.saveSelectedPackageId(paketUmroh.id);
+                        await PackageService.saveSelectedPackageId(paketUmroh.id);
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => TabunganUmrohScreen(paketUmroh: paketUmroh, id_package: paketUmroh.id), // Tambahkan id_package
+                            builder: (context) => SavingScreen(packageModel: paketUmroh, idPackage: paketUmroh.id), // Tambahkan id_package
                           ),
                         );
                       }
@@ -104,13 +105,13 @@ class HomeScreen extends StatelessWidget {
     return decodedToken['user']['id'];
   }
 
-  Future<bool?> _showConfirmationDialog(BuildContext context, PaketUmroh paketUmroh) async {
+  Future<bool?> _showConfirmationDialog(BuildContext context, PackageModel packageModel) async {
     return showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Konfirmasi'),
-          content: Text('Anda yakin ingin memilih paket ${paketUmroh.nama}?'),
+          content: Text('Anda yakin ingin memilih paket ${packageModel.nama}?'),
           actions: <Widget>[
             TextButton(
               onPressed: () {

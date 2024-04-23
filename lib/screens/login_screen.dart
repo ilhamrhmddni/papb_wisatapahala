@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:wisatapahala/services/userservice.dart';
-import 'package:wisatapahala/screens/registerscreen.dart';
+import 'package:wisatapahala/services/user_service.dart';
+import 'package:wisatapahala/screens/register_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   final TextEditingController emailController = TextEditingController();

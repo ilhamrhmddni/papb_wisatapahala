@@ -1,5 +1,5 @@
   import 'package:flutter/material.dart';
-  import 'package:wisatapahala/screens/splashscreen.dart';
+  import 'package:wisatapahala/screens/splash_screen.dart';
 
   void main() {
     runApp(MyApp());

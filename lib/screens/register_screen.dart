@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:wisatapahala/services/userservice.dart';
-import 'package:wisatapahala/screens/loginscreen.dart';
+import 'package:wisatapahala/services/user_service.dart';
+import 'package:wisatapahala/screens/login_screen.dart';
 
 class RegisterScreen extends StatelessWidget {
   final TextEditingController _usernameController = TextEditingController();

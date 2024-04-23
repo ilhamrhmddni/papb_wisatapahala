@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
-class AddTabunganScreen extends StatelessWidget {
-  final TextEditingController _jumlahTabunganController = TextEditingController(); // Tambahkan controller untuk TextField
+class SavingAddScreen extends StatelessWidget {
+  final TextEditingController _jumlahTabunganController = TextEditingController();
+  final void Function(int) onTambahTabungan;
+
+  SavingAddScreen({required this.onTambahTabungan});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +23,7 @@ class AddTabunganScreen extends StatelessWidget {
             ),
             SizedBox(height: 10),
             TextField(
-              controller: _jumlahTabunganController, // Tambahkan controller
+              controller: _jumlahTabunganController,
               decoration: InputDecoration(
                 labelText: 'Jumlah Tabungan',
               ),
@@ -29,7 +32,7 @@ class AddTabunganScreen extends StatelessWidget {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                _tambahTabungan(context); // Panggil fungsi _tambahTabungan
+                _tambahTabungan(context);
               },
               child: Text('Simpan'),
             ),
@@ -40,15 +43,11 @@ class AddTabunganScreen extends StatelessWidget {
   }
 
   void _tambahTabungan(BuildContext context) {
-    String jumlahTabungan = _jumlahTabunganController.text.trim(); // Ambil nilai dari TextField
-    // Validasi jika jumlah tabungan tidak kosong
+    String jumlahTabungan = _jumlahTabunganController.text.trim();
     if (jumlahTabungan.isNotEmpty) {
-      // Lakukan logika untuk menyimpan tabungan ke basis data atau tempat penyimpanan yang sesuai
-      // Misalnya, Anda dapat menggunakan UserService untuk menyimpan data tabungan ke pengguna yang saat ini masuk
-      // UserService.tambahTabungan(jumlahTabungan);
-      // Setelah tabungan ditambahkan, Anda dapat menavigasi ke layar lain atau melakukan tindakan lain sesuai kebutuhan aplikasi Anda
+      onTambahTabungan(int.parse(jumlahTabungan));
+      Navigator.pop(context);
     } else {
-      // Tampilkan pesan kesalahan jika jumlah tabungan kosong
       showDialog(
         context: context,
         builder: (context) => AlertDialog(

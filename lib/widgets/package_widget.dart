@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // Import untuk memformat tanggal
-import 'package:wisatapahala/models/paketumrohmodel.dart';
+import 'package:wisatapahala/models/package_model.dart';
 
-class PaketUmrohCard extends StatelessWidget {
-  final PaketUmroh paketUmroh;
+class PackageWidget extends StatelessWidget {
+  final PackageModel paketUmroh;
   final VoidCallback onTap;
 
-  PaketUmrohCard({required this.paketUmroh, required this.onTap});
+  PackageWidget({required this.paketUmroh, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +45,7 @@ class PaketUmrohCard extends StatelessWidget {
               Row( // Menampilkan tanggal keberangkatan dan tanggal kepulangan secara sejajar
                 children: [
                   Text(
-                    'Tanggal Keberangkatan: ${DateFormat('dd MMMM yyyy').format(paketUmroh.tanggal_kepergian)}',
+                    'Tanggal Keberangkatan: ${DateFormat('dd MMMM yyyy').format(paketUmroh.tanggalKepergian)}',
                     style: TextStyle(fontSize: 14), // Mengatur ukuran font
                   ),
                 ],
@@ -54,7 +54,7 @@ class PaketUmrohCard extends StatelessWidget {
               Row( // Menampilkan tanggal keberangkatan dan tanggal kepulangan secara sejajar
                 children: [
                   Text(
-                    'Tanggal Kepulangan: ${DateFormat('dd MMMM yyyy').format(paketUmroh.tanggal_kepulangan)}',
+                    'Tanggal Kepulangan: ${DateFormat('dd MMMM yyyy').format(paketUmroh.tanggalKepulangan)}',
                     style: TextStyle(fontSize: 14), // Mengatur ukuran font
                   ),
                 ],

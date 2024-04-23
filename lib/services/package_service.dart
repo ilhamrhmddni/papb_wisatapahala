@@ -1,23 +1,23 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:wisatapahala/models/paketumrohmodel.dart';
+import 'package:wisatapahala/models/package_model.dart';
 
-class PaketUmrohService {
+class PackageService {
   static const String apiUrl = 'https://papb-wisatapahala-be.vercel.app/users';
 
-  static Future<List<PaketUmroh>> getPaketUmrohList() async {
+  static Future<List<PackageModel>> getPaketUmrohList() async {
     final response = await http.get(Uri.parse('https://papb-wisatapahala-be.vercel.app/packages'));
 
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body);
-      return data.map((item) => PaketUmroh.fromJson(item)).toList();
+      return data.map((item) => PackageModel.fromJson(item)).toList();
     } else {
       throw Exception('Failed to load paket umroh');
     }
   }
 
-  static Future<void> saveSelectedPackageIdToUserApi({required String userId, required String id_package}) async {
+  static Future<void> saveSelectedPackageIdToUserApi({required String userId, required String idPackage}) async {
     try {
       final apiUrl = 'https://papb-wisatapahala-be.vercel.app/users/$userId';
       final headers = {'Content-Type': 'application/json'};
@@ -25,7 +25,7 @@ class PaketUmrohService {
       final response = await http.put(
         Uri.parse(apiUrl),
         headers: headers,
-        body: jsonEncode({'id_package': id_package}),
+        body: jsonEncode({'id_package': idPackage}),
       );
 
       if (response.statusCode == 200) {
@@ -41,9 +41,9 @@ class PaketUmrohService {
     }
   }
 
-  static Future<void> saveSelectedPackageId(String id_package) async {
+  static Future<void> saveSelectedPackageId(String idPackage) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('id_package', id_package);
+    await prefs.setString('id_package', idPackage);
   }
 
   static Future<String?> getSelectedPackageId() async {
