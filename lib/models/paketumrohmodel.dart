@@ -21,7 +21,7 @@ class PaketUmroh {
   // Konstruktor fromJson
   factory PaketUmroh.fromJson(Map<String, dynamic> json) {
     return PaketUmroh(
-      id: json['id'] ?? '',
+      id: json['_id'] ?? '',
       nama: json['nama'] ?? '',
       jenis: json['jenis'] ?? '',
       tanggal_kepulangan: json['tanggal_kepulangan'] != null ? DateTime.parse(json['tanggal_kepulangan']) : DateTime.now(),

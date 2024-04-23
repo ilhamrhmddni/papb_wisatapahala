@@ -17,7 +17,7 @@ class PaketUmrohService {
     }
   }
 
-  static Future<void> saveSelectedPackageIdToUserApi({required String userId, required String packageId}) async {
+  static Future<void> saveSelectedPackageIdToUserApi({required String userId, required String id_package}) async {
     try {
       final apiUrl = 'https://papb-wisatapahala-be.vercel.app/users/$userId';
       final headers = {'Content-Type': 'application/json'};
@@ -25,7 +25,7 @@ class PaketUmrohService {
       final response = await http.put(
         Uri.parse(apiUrl),
         headers: headers,
-        body: jsonEncode({'id_package': packageId}),
+        body: jsonEncode({'id_package': id_package}),
       );
 
       if (response.statusCode == 200) {
@@ -41,9 +41,9 @@ class PaketUmrohService {
     }
   }
 
-  static Future<void> saveSelectedPackageId(String packageId) async {
+  static Future<void> saveSelectedPackageId(String id_package) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('id_package', packageId);
+    await prefs.setString('id_package', id_package);
   }
 
   static Future<String?> getSelectedPackageId() async {

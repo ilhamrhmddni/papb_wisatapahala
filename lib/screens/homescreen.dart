@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wisatapahala/services/paketumrohservice.dart';
 import 'package:wisatapahala/models/paketumrohmodel.dart';
-import 'package:wisatapahala/screens/tabunganscreen.dart';
+import 'package:wisatapahala/screens/tabunganscreen.dart'; // Import the tabungan umroh screen
 import 'package:wisatapahala/widgets/paketumrohwidget.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 class HomeScreen extends StatelessWidget {
   @override
@@ -67,17 +68,18 @@ class HomeScreen extends StatelessWidget {
                   return PaketUmrohCard(
                     paketUmroh: paketUmroh,
                     onTap: () async {
+                      // _getUserId;
                       bool? confirmed = await _showConfirmationDialog(context, paketUmroh);
                       if (confirmed != null && confirmed) {
                         await PaketUmrohService.saveSelectedPackageIdToUserApi(
                           userId: userId,
-                          packageId: paketUmroh.id,
+                          id_package: paketUmroh.id,
                         );
                         await PaketUmrohService.saveSelectedPackageId(paketUmroh.id);
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => TabunganUmrohScreen(paketUmroh),
+                            builder: (context) => TabunganUmrohScreen(paketUmroh: paketUmroh, id_package: paketUmroh.id), // Tambahkan id_package
                           ),
                         );
                       }
@@ -94,7 +96,12 @@ class HomeScreen extends StatelessWidget {
 
   Future<String> _getUserId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString('userId') ?? '';
+    String token = prefs.getString("token") ?? "";
+    Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+    // print("decodedToken");
+    // print(decodedToken['user']['id']);
+    // return prefs.getString('userId') ?? '';
+    return decodedToken['user']['id'];
   }
 
   Future<bool?> _showConfirmationDialog(BuildContext context, PaketUmroh paketUmroh) async {

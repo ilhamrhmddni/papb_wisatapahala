@@ -7,7 +7,7 @@ import 'package:wisatapahala/services/tabunganservice.dart';
 class TabunganUmrohScreen extends StatefulWidget {
   final PaketUmroh paketUmroh;
 
-  TabunganUmrohScreen(this.paketUmroh);
+  TabunganUmrohScreen({required this.paketUmroh, required String id_package});
 
   @override
   _TabunganUmrohScreenState createState() => _TabunganUmrohScreenState();

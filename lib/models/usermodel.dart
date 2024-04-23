@@ -6,14 +6,14 @@ class User {
   late String email;
   late String password;
   late bool isAdmin;
-  late List<ObjectId> idPackage;
+  late List<ObjectId> id_package; // Changed field name to match
 
   User({
     required this.username,
     required this.email,
     required this.password,
     required this.isAdmin,
-    required this.idPackage,
+    required this.id_package, // Adjusted parameter name
   });
 
   User.fromJson(Map<String, dynamic> json)
@@ -22,7 +22,7 @@ class User {
         email = json['email'],
         password = json['password'],
         isAdmin = json['is_admin'],
-        idPackage = (json['id_package'] as List)
+        id_package = (json['id_package'] as List)
             .map((id) => ObjectId.parse(id))
             .toList();
 
@@ -31,6 +31,7 @@ class User {
         'email': email,
         'password': password,
         'is_admin': isAdmin,
-        'id_package': idPackage.map((id) => id.toHexString()).toList(),
+        'id_package': id_package.map((id) => id.toHexString()).toList(),
       };
 }
+
