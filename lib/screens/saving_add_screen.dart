@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:wisatapahala/services/saving_service.dart';
+
 
 class SavingAddScreen extends StatelessWidget {
-  final TextEditingController _jumlahTabunganController = TextEditingController();
-  final void Function(int) onTambahTabungan;
+  final TextEditingController _jumlahTabunganController =
+      TextEditingController();
+  final SavingService savingService;
 
-  SavingAddScreen({required this.onTambahTabungan});
+  SavingAddScreen({required this.savingService});
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +48,11 @@ class SavingAddScreen extends StatelessWidget {
   void _tambahTabungan(BuildContext context) {
     String jumlahTabungan = _jumlahTabunganController.text.trim();
     if (jumlahTabungan.isNotEmpty) {
-      onTambahTabungan(int.parse(jumlahTabungan));
+      // Panggil metode tambahkanTabungan dari savingService
+      savingService.tambahkanTabungan(
+        int.parse(jumlahTabungan),
+        DateTime.now().toString(),
+      );
       Navigator.pop(context);
     } else {
       showDialog(

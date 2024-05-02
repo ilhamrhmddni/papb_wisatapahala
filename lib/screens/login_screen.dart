@@ -6,6 +6,7 @@ class LoginScreen extends StatelessWidget {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
+  // Fungsi untuk melakukan proses login
   void _login(BuildContext context) async {
     String email = emailController.text;
     String password = passwordController.text;
@@ -61,7 +62,7 @@ class LoginScreen extends StatelessWidget {
             ),
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () => _login(context),
+              onPressed: () => _login(context), // Panggil fungsi login saat tombol ditekan
               child: Text('Login'),
             ),
             SizedBox(height: 10),
@@ -72,6 +73,7 @@ class LoginScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 16.0),
         child: TextButton(
           onPressed: () {
+            // Navigasi ke layar pendaftaran saat tombol ditekan
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => RegisterScreen()),

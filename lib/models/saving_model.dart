@@ -1,9 +1,9 @@
 import 'package:wisatapahala/models/base_model.dart';
 
 class SavingModel extends BaseModel {
-  late String waktu;
-  late String nominal;
-  late List<String> idUser;
+  late String waktu; // Waktu penyimpanan tabungan
+  late String nominal; // Jumlah tabungan
+  late String idUser; // ID pengguna terkait dengan tabungan
 
   SavingModel({
     required String id,
@@ -14,8 +14,8 @@ class SavingModel extends BaseModel {
 
   SavingModel.fromJson(Map<String, dynamic> json)
       : waktu = json['waktu'] ?? '',
-        nominal = json['nominal'] ?? '',
-        idUser = List<String>.from(json['id_user'] ?? []),
+        nominal = json['nominal'] ?? '0',
+        idUser = json['id_user'] ?? '',
         super(id: json['_id'] ?? '');
 
   @override

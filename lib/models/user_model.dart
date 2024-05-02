@@ -1,11 +1,11 @@
 import 'package:wisatapahala/models/base_model.dart';
 
 class UserModel extends BaseModel {
-  late String username;
-  late String email;
-  late String password;
-  late bool isAdmin;
-  late List<String> idPackage;
+  late String username; // Username pengguna
+  late String email; // Email pengguna
+  late String password; // Password pengguna
+  late bool isAdmin; // Status apakah pengguna adalah admin atau tidak
+  late List<String> idPackage; // Daftar ID paket yang terkait dengan pengguna
 
   UserModel({
     required String id,

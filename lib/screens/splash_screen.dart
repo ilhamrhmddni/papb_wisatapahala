@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wisatapahala/services/package_service.dart';
 import 'package:wisatapahala/services/user_service.dart';
 import 'package:wisatapahala/screens/login_screen.dart';
 import 'package:wisatapahala/screens/package_screen.dart';
@@ -6,56 +7,80 @@ import 'package:wisatapahala/screens/saving_screen.dart';
 import 'package:wisatapahala/models/package_model.dart';
 
 class SplashScreen extends StatelessWidget {
-
-  late final PackageModel paketUmroh;
-
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<bool>(
+      // Periksa status login pengguna
       future: UserService.checkLoginStatus(),
       builder: (context, AsyncSnapshot<bool> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator();
+          // Tampilkan indikator loading jika masih menunggu
+          return Center(child: CircularProgressIndicator());
         } else {
           if (snapshot.hasData && snapshot.data!) {
-            // If the user is logged in, get the userId
-            final Future<String> userIdFuture = UserService.getUserId();
+            // Jika pengguna sudah login, dapatkan ID pengguna
             return FutureBuilder<String>(
-              future: userIdFuture,
+              future: UserService.getUserId(),
               builder: (context, AsyncSnapshot<String> userIdSnapshot) {
-                if (userIdSnapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator();
+                if (userIdSnapshot.connectionState ==
+                    ConnectionState.waiting) {
+                  // Tampilkan indikator loading jika masih menunggu
+                  return Center(child: CircularProgressIndicator());
                 } else {
                   final userId = userIdSnapshot.data;
                   if (userId != null) {
-                    // If userId is available, get the idPackage based on userId
+                    // Jika ID pengguna tersedia, ambil ID paket yang tersimpan untuk pengguna tersebut
                     return FutureBuilder<String>(
                       future: UserService.getSavedPackageId(userId),
-                      builder: (context, AsyncSnapshot<String> packageSnapshot) {
-                        if (packageSnapshot.connectionState == ConnectionState.waiting) {
-                          return CircularProgressIndicator();
+                      builder: (context,
+                          AsyncSnapshot<String> packageSnapshot) {
+                        if (packageSnapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          // Tampilkan indikator loading jika masih menunggu
+                          return Center(child: CircularProgressIndicator());
                         } else {
                           final idPackage = packageSnapshot.data;
-                          print(idPackage);
+                          // Periksa apakah ID paket ada
                           if (idPackage != null && idPackage.isNotEmpty) {
-                            // If there's an id_package, navigate to the corresponding SavingScreen
-                            return SavingScreen(packageModel: paketUmroh, idPackage: idPackage);
+                            // Jika ada, buat objek PackageModel dengan ID paket
+                            return FutureBuilder<PackageModel>(
+                              future: PackageService.saveSelectedPackageId(idPackage),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  // Tampilkan indikator loading jika masih menunggu
+                                  return Center(
+                                      child: CircularProgressIndicator());
+                                } else if (snapshot.hasError) {
+                                  // Tampilkan pesan kesalahan jika terjadi kesalahan
+                                  return Text(
+                                      'Error: ${snapshot.error.toString()}');
+                                } else {
+                                  // Jika objek PackageModel diperoleh, navigasikan ke SavingScreen
+                                  final packageModel = snapshot.data!;
+                                  return SavingScreen(
+                                    packageModel: packageModel,
+                                    idPackage: idPackage,
+                                  );
+                                }
+                              },
+                            );
                           } else {
-                            // If there's no id_package, go back to HomeScreen
+                            // Jika tidak ada ID paket, kembali ke PackageScreen
                             return PackageScreen();
                           }
                         }
                       },
                     );
                   } else {
-                    // If userId is null, display an error message or handle it accordingly
+                    // Jika ID pengguna tidak ditemukan, tampilkan pesan kesalahan
                     return Text('Error: User ID not found');
                   }
                 }
               },
             );
           } else {
-            // If the user is not logged in, navigate to the LoginScreen
+            // Jika pengguna belum login, tampilkan layar login
             return LoginScreen();
           }
         }

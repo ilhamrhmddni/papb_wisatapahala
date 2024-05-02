@@ -1,12 +1,12 @@
 import 'package:wisatapahala/models/base_model.dart';
 
 class PackageModel extends BaseModel {
-  late String nama;
-  late String jenis;
-  late DateTime tanggalKepulangan;
-  late DateTime tanggalKepergian;
-  late int harga;
-  late String detail;
+  late String nama; // Nama paket
+  late String jenis; // Jenis paket
+  late DateTime tanggalKepulangan; // Tanggal kepulangan
+  late DateTime tanggalKepergian; // Tanggal kepergian
+  late int harga; // Harga paket
+  late String detail; // Detail atau deskripsi paket
 
   PackageModel({
     required String id,

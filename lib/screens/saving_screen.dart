@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wisatapahala/models/package_model.dart';
-import 'package:wisatapahala/models/saving_model.dart';
 import 'package:wisatapahala/screens/saving_add_screen.dart';
 import 'package:wisatapahala/services/saving_service.dart';
 
@@ -16,43 +15,34 @@ class SavingScreen extends StatefulWidget {
 
 class _SavingScreenState extends State<SavingScreen> {
   late SavingService savingService;
-  int tabunganSaatIni = 0; // Current tabungan
-  List<SavingModel> riwayatTabungan = []; // History of tabungan entries
+  int tabunganSaatIni = 0;
+  List<dynamic> riwayatTabungan = [];
 
   @override
   void initState() {
     super.initState();
     _initializeService();
-    _loadData();
   }
 
   void _initializeService() async {
-    final prefs = await SharedPreferences.getInstance();
-    savingService = SavingService(prefs.getString('userId') ?? '', widget.packageModel.id);
-  }
+  final prefs = await SharedPreferences.getInstance();
+  final userId = prefs.getString('userId'); // Ambil userId dari SharedPreferences
+  setState(() {
+    savingService = SavingService(userId!);
+  });
+  _loadData();
+}
+
 
   Future<void> _loadData() async {
     try {
-      // Memuat riwayat tabungan dari API menggunakan SavingService
-      final riwayat = await savingService.loadRiwayatTabungan();
-
-      // Menghitung tabungan saat ini dengan menjumlahkan semua nilai nominal dalam riwayat
-      final int currentTabungan = riwayat.isNotEmpty ? riwayat.map((entry) => entry.nominal).reduce((value, element) => value + element)! : 0;
-
+      List<dynamic> rawData = await savingService.getAllTabungan();
       setState(() {
-        tabunganSaatIni = currentTabungan;
-        riwayatTabungan = riwayat;
+        riwayatTabungan = rawData;
       });
     } catch (e) {
-      // Tangani kesalahan jika gagal memuat data
       print('Error: $e');
-      // Menampilkan pesan kesalahan atau melakukan tindakan lain sesuai kebutuhan
     }
-  }
-
-  Future<void> _tambahTabungan(int jumlah) async {
-    await savingService.tambahkanTabungan(jumlah);
-    _loadData();
   }
 
   @override
@@ -60,33 +50,18 @@ class _SavingScreenState extends State<SavingScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Kelola Tabungan'),
-        leading: IconButton(
-          onPressed: () {},
-          icon: Icon(Icons.menu),
-        ),
-        actions: <Widget>[
-          IconButton(
-            onPressed: _refreshData,
-            icon: Icon(Icons.autorenew),
-          ),
-        ],
       ),
-      floatingActionButton: Padding(
-        padding: EdgeInsets.only(bottom: 16),
-        child: FloatingActionButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => SavingAddScreen(
-                  onTambahTabungan: _tambahTabungan,
-                ),
-              ),
-            );
-          },
-          backgroundColor: Colors.green,
-          child: Icon(Icons.add),
-        ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SavingAddScreen(savingService: savingService),
+            ),
+          );
+        },
+        backgroundColor: Colors.green,
+        child: Icon(Icons.add),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       body: Padding(
@@ -129,7 +104,8 @@ class _SavingScreenState extends State<SavingScreen> {
                 itemBuilder: (context, index) {
                   return ListTile(
                     title: Text('Tabungan ke-${index + 1}'),
-                    subtitle: Text('Jumlah: ${riwayatTabungan[index].nominal}'), // Display the nominal value
+                    subtitle: Text(
+                        'Jumlah: ${riwayatTabungan[index]['nominal']}'),
                   );
                 },
               ),
@@ -138,9 +114,5 @@ class _SavingScreenState extends State<SavingScreen> {
         ),
       ),
     );
-  }
-
-  void _refreshData() {
-    _loadData();
   }
 }

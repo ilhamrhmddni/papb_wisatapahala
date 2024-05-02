@@ -8,6 +8,7 @@ import 'dart:convert';
 class UserService {
   static const String baseUrl = 'https://papb-wisatapahala-be.vercel.app/authorization';
 
+  // Metode untuk melakukan login pengguna
   static Future<void> loginUser(BuildContext context, String email, String password) async {
     try {
       final response = await http.post(
@@ -20,7 +21,7 @@ class UserService {
         // Login berhasil
         Map<String, dynamic> responseData = json.decode(response.body);
         String? token = responseData['token']; // Ambil token dari respons API
-        print(token);
+
         if (token != null) {
           // Simpan token ke SharedPreferences
           SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -76,6 +77,7 @@ class UserService {
     }
   }
 
+  // Metode untuk melakukan registrasi pengguna
   static Future<void> registerUser(BuildContext context, String username, String email, String password) async {
     try {
       final response = await http.post(
@@ -85,17 +87,18 @@ class UserService {
       );
 
       if (response.statusCode == 201) {
+        // Registrasi berhasil
         ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Akun Telah Dibuat'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-      // Tunggu 2 detik sebelum kembali ke halaman login
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => LoginScreen()),
-      );
+          SnackBar(
+            content: Text('Akun Telah Dibuat'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        // Tunggu 2 detik sebelum kembali ke halaman login
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => LoginScreen()),
+        );
       } else {
         // Registrasi gagal
         // Tampilkan pesan kesalahan
@@ -136,6 +139,7 @@ class UserService {
     }
   }
 
+  // Metode untuk melakukan logout pengguna
   static Future<void> logoutUser(BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isLoggedIn', false);
@@ -146,43 +150,48 @@ class UserService {
     );
   }
 
-    static Future<bool> checkLoginStatus() async {
+  // Metode untuk memeriksa status login pengguna
+  static Future<bool> checkLoginStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
     return isLoggedIn;
-  }    
+  }
 
-static Future<String> getSavedPackageId(String userId) async {
-  final apiUrl = 'https://papb-wisatapahala-be.vercel.app/users/$userId'; // Endpoint API yang menerima id_user sebagai parameter
-  final headers = {'Content-Type': 'application/json'}; 
+  // Metode untuk mendapatkan id_package yang disimpan untuk pengguna tertentu
+  static Future<String> getSavedPackageId(String userId) async {
+    final apiUrl = 'https://papb-wisatapahala-be.vercel.app/users/$userId'; // Endpoint API yang menerima id_user sebagai parameter
+    final headers = {'Content-Type': 'application/json'};
 
-  try {
-    // Melakukan request ke API dengan menggunakan token sebagai otorisasi
-    final response = await http.get(
-      Uri.parse(apiUrl), 
-      headers: headers,
-    );
-    
-    // Mengecek apakah respons berhasil (status code 200)
-    if (response.statusCode == 200) {
-      // Mengekstrak data dari respons JSON
-      final responseData = json.decode(response.body);
-      final idPackage = responseData['id_package'];
-      
-      // Mengembalikan id_package
-      return idPackage;
-    } else {
-      // Jika respons tidak berhasil, lemparkan exception
+    try {
+      // Melakukan request ke API dengan menggunakan token sebagai otorisasi
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: headers,
+      );
+
+      // Mengecek apakah respons berhasil (status code 200)
+      if (response.statusCode == 200) {
+        // Mengekstrak data dari respons JSON
+        final responseData = json.decode(response.body);
+        final idPackage = responseData['id_package'];
+
+        // Mengembalikan id_package
+        return idPackage;
+      } else {
+        // Jika respons tidak berhasil, lemparkan exception
+        throw Exception('Failed to load package id');
+      }
+    } catch (e) {
+      // Tangani error jika ada kesalahan dalam melakukan request
+      print('Error: $e');
       throw Exception('Failed to load package id');
     }
-  } catch (e) {
-    // Tangani error jika ada kesalahan dalam melakukan request
-    print('Error: $e');
-    throw Exception('Failed to load package id');
   }
-}
-static Future<String> getUserId() async {
+
+  // Metode untuk mendapatkan userId dari SharedPreferences
+  static Future<String> getUserId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString('userId') ?? '';
   }
 }
+

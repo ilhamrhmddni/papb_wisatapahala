@@ -1,5 +1,5 @@
 class BaseModel {
-  late String id;
+  late String id; // ID objek model
 
   BaseModel({required this.id});
 

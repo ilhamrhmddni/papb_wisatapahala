@@ -1,76 +1,56 @@
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-class SavingService {
-  TextEditingController controller = TextEditingController();
-  late List<int> riwayatPenambahanTabungan;
+import 'package:wisatapahala/models/saving_model.dart';
 
+class SavingService {
   late String userId;
-  late String id;
   late String apiUrl;
 
-  SavingService(String userId, String id)
-      : userId = userId,
-        id = id,
-        apiUrl = 'https://papb-wisatapahala-be.vercel.app/savings/users/$id',
-        riwayatPenambahanTabungan = []; // Initialize the list here
-
-  Future<void> tambahkanTabungan(int tabunganSaatIni) async {
-    int tambahan = int.tryParse(controller.text) ?? 0;
-    if (tambahan > 0) {
-      riwayatPenambahanTabungan.add(tambahan);
-      tabunganSaatIni += tambahan;
-      controller.clear();
-      await updateTabungan(tabunganSaatIni, riwayatPenambahanTabungan);
-    }
-  }
-
-  Future<void> updateTabungan(int tabungan, List<int> riwayat) async {
+  // Constructor untuk menginisialisasi SavingService dengan userId
+  SavingService(this.userId)
+      : apiUrl =
+            'https://papb-wisatapahala-be.vercel.app/savings/users';
+  
+  // Metode untuk menambahkan tabungan ke dalam riwayat tabungan pengguna
+  Future<void> tambahkanTabungan(int nominal, String waktu) async {
     try {
-      final response = await http.put(
-        Uri.parse(apiUrl),
+      final response = await http.post(
+        Uri.parse('$apiUrl/$userId'),
         headers: {'Content-Type': 'application/json'},
-        body: json.encode({'userId': userId, 'id': id, 'riwayat': riwayat}),
+        body: jsonEncode({
+          'nominal': nominal,
+          'waktu': waktu,
+          'id_user': userId
+        }),
       );
       if (response.statusCode == 200) {
-        print('Data tabungan berhasil disinkronkan dengan database');
+        print('Tabungan berhasil ditambahkan');
       } else {
-        print('Gagal menyinkronkan data tabungan dengan database');
+        print('Gagal menambahkan tabungan');
       }
     } catch (e) {
       print('Error: $e');
     }
   }
 
-  Future<int> loadTotalTabungan() async {
+  // Metode untuk mendapatkan semua tabungan dari API
+  Future<List> getAllTabungan() async {
     try {
       final response = await http.get(Uri.parse(apiUrl));
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
-        return jsonData['nominal'] ?? 0; // Make sure to handle null case
+        final tabunganList = jsonData != null
+            ? List<SavingModel>.from(
+                jsonData.map((x) => SavingModel.fromJson(x)))
+            : [];
+        return tabunganList;
       } else {
-        throw Exception('Failed to load total tabungan');
+        throw Exception('Gagal memuat data tabungan');
       }
     } catch (e) {
-      print('Error: $e');
-      throw Exception('Failed to load total tabungan');
-    }
-  }
-
-  Future<List<int>> loadRiwayatTabungan() async {
-    try {
-      final response = await http.get(Uri.parse(apiUrl));
-      if (response.statusCode == 200) {
-        final jsonData = json.decode(response.body);
-        final riwayat = jsonData['nominal'] ?? [];
-        return riwayat.cast<int>(); // Convert dynamic to List<int>
-      } else {
-        throw Exception('Failed to load riwayat tabungan');
-      }
-    } catch (e) {
-      print('Error: $e');
-      throw Exception('Failed to load riwayat tabungan');
+      print('Error saat memuat data tabungan: $e');
+      throw Exception('Gagal memuat data tabungan');
     }
   }
 }
