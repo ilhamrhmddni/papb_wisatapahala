@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:wisatapahala/services/saving_service.dart';
 
-
 class SavingAddScreen extends StatelessWidget {
   final TextEditingController _jumlahTabunganController =
       TextEditingController();
-  final SavingService savingService;
+  final SavingService? savingService;
 
   SavingAddScreen({required this.savingService});
 
   @override
   Widget build(BuildContext context) {
+    if (savingService == null) {
+      return Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Tambah Tabungan'),
@@ -47,13 +54,31 @@ class SavingAddScreen extends StatelessWidget {
 
   void _tambahTabungan(BuildContext context) {
     String jumlahTabungan = _jumlahTabunganController.text.trim();
-    if (jumlahTabungan.isNotEmpty) {
-      // Panggil metode tambahkanTabungan dari savingService
-      savingService.tambahkanTabungan(
-        int.parse(jumlahTabungan),
-        DateTime.now().toString(),
-      );
-      Navigator.pop(context);
+    if (jumlahTabungan.isNotEmpty && savingService != null) {
+      int? tabungan = int.tryParse(jumlahTabungan);
+      if (tabungan != null) {
+        savingService!.tambahkanTabungan(
+          tabungan,
+          DateTime.now().toString(),
+        );
+        Navigator.pop(context);
+      } else {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Error'),
+            content: Text('Masukkan angka yang valid untuk jumlah tabungan.'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
     } else {
       showDialog(
         context: context,

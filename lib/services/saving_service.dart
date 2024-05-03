@@ -20,8 +20,7 @@ class SavingService {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'nominal': nominal,
-          'waktu': waktu,
-          'id_user': userId
+          'waktu': waktu
         }),
       );
       if (response.statusCode == 200) {

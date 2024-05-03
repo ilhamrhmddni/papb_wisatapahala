@@ -11,10 +11,10 @@ class SavingScreen extends StatefulWidget {
 
   @override
   _SavingScreenState createState() => _SavingScreenState();
-}
+} 
 
 class _SavingScreenState extends State<SavingScreen> {
-  late SavingService savingService;
+  SavingService? savingService;
   int tabunganSaatIni = 0;
   List<dynamic> riwayatTabungan = [];
 
@@ -22,43 +22,64 @@ class _SavingScreenState extends State<SavingScreen> {
   void initState() {
     super.initState();
     _initializeService();
-  }
+  } 
 
-  void _initializeService() async {
-  final prefs = await SharedPreferences.getInstance();
-  final userId = prefs.getString('userId'); // Ambil userId dari SharedPreferences
-  setState(() {
-    savingService = SavingService(userId!);
-  });
-  _loadData();
-}
-
-
-  Future<void> _loadData() async {
-    try {
-      List<dynamic> rawData = await savingService.getAllTabungan();
+  Future<void> _initializeService() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getString('userId'); // Ambil userId dari SharedPreferences
+    if (userId != null) {
       setState(() {
-        riwayatTabungan = rawData;
+        savingService = SavingService(userId);
       });
-    } catch (e) {
-      print('Error: $e');
+      _loadData();
+    } else {
+      // Tangani kasus di mana userId tidak ada
+      // Misalnya, arahkan pengguna ke halaman login
+      // Atau tampilkan pesan kesalahan
     }
   }
 
+  Future<void> _loadData() async {
+  try {
+    if (savingService != null) { // tambahkan pengecekan ini
+      List<dynamic> rawData = await savingService!.getAllTabungan();
+      setState(() {
+        riwayatTabungan = rawData;
+      });
+    }
+  } catch (e) {
+    print('Error: $e');
+  }
+}
+
+
   @override
   Widget build(BuildContext context) {
+    if (savingService == null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('Kelola Tabungan'),
+        ),
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Kelola Tabungan'),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => SavingAddScreen(savingService: savingService),
-            ),
-          );
+          if (savingService != null) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SavingAddScreen(savingService: savingService!,),
+              ),
+            );
+          }
         },
         backgroundColor: Colors.green,
         child: Icon(Icons.add),
