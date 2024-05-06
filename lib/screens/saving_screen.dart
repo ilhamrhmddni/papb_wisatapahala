@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wisatapahala/models/package_model.dart';
+import 'package:wisatapahala/models/saving_model.dart';
 import 'package:wisatapahala/screens/saving_add_screen.dart';
+import 'package:wisatapahala/services/package_service.dart';
 import 'package:wisatapahala/services/saving_service.dart';
 
 class SavingScreen extends StatefulWidget {
@@ -11,129 +13,159 @@ class SavingScreen extends StatefulWidget {
 
   @override
   _SavingScreenState createState() => _SavingScreenState();
-} 
+}
 
 class _SavingScreenState extends State<SavingScreen> {
   SavingService? savingService;
   int tabunganSaatIni = 0;
-  List<dynamic> riwayatTabungan = [];
+  int targetTabungan = 0;
+  List<SavingModel> riwayatTabungan = [];
 
   @override
   void initState() {
     super.initState();
-    _initializeService();
-  } 
+    _initializeAndLoadData();
+  }
 
-  Future<void> _initializeService() async {
-    final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getString('userId'); // Ambil userId dari SharedPreferences
-    if (userId != null) {
-      setState(() {
-        savingService = SavingService(userId);
-      });
-      _loadData();
-    } else {
-      // Tangani kasus di mana userId tidak ada
-      // Misalnya, arahkan pengguna ke halaman login
-      // Atau tampilkan pesan kesalahan
+  Future<void> _initializeAndLoadData() async {
+    print("Initializing and loading data..."); // Tambahkan print statement
+    try {
+      // Mendapatkan id paket yang dipilih
+      String? idPackage = await PackageService.getSelectedPackageId();
+      if (idPackage != null) {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        String? userId = prefs.getString('id_user');
+        if (userId != null) {
+          setState(() {
+            savingService = SavingService(userId);
+          });
+          print("Selected user ID: $userId"); // Tambahkan print statement
+          print("Selected package ID: $idPackage"); // Tambahkan print statement
+
+          // Mengambil harga paket berdasarkan id
+          String? price = await PackageService.getPaketPriceById(idPackage);
+          setState(() {
+            targetTabungan = int.parse(price!);
+          });
+          print("Package price: $price"); // Tambahkan print statement
+
+          if (savingService != null) {
+            List<SavingModel> rawData = await savingService!.getAllTabungan(userId);
+            setState(() {
+              riwayatTabungan = rawData;
+              tabunganSaatIni = _calculateTotalSaving();
+            });
+            print("Total savings: $tabunganSaatIni"); // Tambahkan print statement
+          }
+        } else {
+          print('Error: userId is null');
+        }
+      } else {
+        print('Error: idPackage is null');
+      }
+    } catch (e) {
+      print('Error: $e');
     }
   }
 
-  Future<void> _loadData() async {
-  try {
-    if (savingService != null) { // tambahkan pengecekan ini
-      List<dynamic> rawData = await savingService!.getAllTabungan();
-      setState(() {
-        riwayatTabungan = rawData;
-      });
+  int _calculateTotalSaving() {
+    int total = 0;
+    for (var saving in riwayatTabungan) {
+      total += saving.nominal;
     }
-  } catch (e) {
-    print('Error: $e');
+    return total;
   }
-}
 
+  // Fungsi untuk memperbarui data pada layar SavingScreen
+  Future<void> refreshData() async {
+    print("Refreshing data..."); // Tambahkan print statement
+    _initializeAndLoadData(); // Memuat ulang data pada layar SavingScreen
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (savingService == null) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text('Kelola Tabungan'),
-        ),
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
-
     return Scaffold(
       appBar: AppBar(
         title: Text('Kelola Tabungan'),
       ),
+      body: savingService != null ? _buildMainContent() : _buildLoadingIndicator(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           if (savingService != null) {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => SavingAddScreen(savingService: savingService!,),
+                builder: (context) => SavingAddScreen(savingService: savingService!),
               ),
-            );
+            ).then((_) {
+              // Setelah kembali dari SavingAddScreen, panggil refreshData() untuk memperbarui data
+              refreshData();
+            });
           }
         },
         backgroundColor: Colors.green,
         child: Icon(Icons.add),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Container(
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Colors.grey,
+    );
+  }
+
+  Widget _buildMainContent() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: Colors.grey,
+              ),
+              borderRadius: BorderRadius.circular(5),
+            ),
+            padding: EdgeInsets.all(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  'Tabungan Saat Ini: $tabunganSaatIni',
+                  style: TextStyle(fontSize: 18),
                 ),
-                borderRadius: BorderRadius.circular(5),
-              ),
-              padding: EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    'Tabungan Saat Ini: $tabunganSaatIni',
-                    style: TextStyle(fontSize: 18),
+                SizedBox(height: 10),
+                Text(
+                  'Target Tabungan: $targetTabungan',
+                  style: TextStyle(fontSize: 18),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 20),
+          Text(
+            'Riwayat Penambahan Tabungan:',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 10),
+          Expanded(
+            child: ListView.builder(
+              itemCount: riwayatTabungan.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text('Tabungan ke-${index + 1}'),
+                  subtitle: Text(
+                    'Jumlah: ${riwayatTabungan[index].nominal}',
                   ),
-                  SizedBox(height: 10),
-                  Text(
-                    'Target Tabungan: ${widget.packageModel.harga}',
-                    style: TextStyle(fontSize: 18),
-                  ),
-                ],
-              ),
+                );
+              },
             ),
-            SizedBox(height: 20),
-            Text(
-              'Riwayat Penambahan Tabungan:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            Expanded(
-              child: ListView.builder(
-                itemCount: riwayatTabungan.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text('Tabungan ke-${index + 1}'),
-                    subtitle: Text(
-                        'Jumlah: ${riwayatTabungan[index]['nominal']}'),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _buildLoadingIndicator() {
+    return Center(
+      child: CircularProgressIndicator(),
     );
   }
 }

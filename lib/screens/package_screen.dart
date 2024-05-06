@@ -9,7 +9,7 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 class PackageScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<String>(
+    return FutureBuilder<String?>(
       // Mendapatkan ID pengguna (userId) menggunakan FutureBuilder
       future: _getUserId(),
       builder: (context, snapshot) {
@@ -93,7 +93,7 @@ class PackageScreen extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => SavingScreen(packageModel: paketUmroh, idPackage: paketUmroh.id),
+                            builder: (context) => SavingScreen(packageModel: paketUmroh, idPackage: paketUmroh.id,),
                           ),
                         );
                       }
@@ -108,7 +108,7 @@ class PackageScreen extends StatelessWidget {
     );
   }
 
-  Future<String> _getUserId() async {
+  Future<String?> _getUserId() async {
     // Mendapatkan userId dari SharedPreferences
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token") ?? "";

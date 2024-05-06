@@ -1,23 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:wisatapahala/services/saving_service.dart';
 
-class SavingAddScreen extends StatelessWidget {
-  final TextEditingController _jumlahTabunganController =
-      TextEditingController();
-  final SavingService? savingService;
+class SavingAddScreen extends StatefulWidget {
+  final SavingService savingService;
 
   SavingAddScreen({required this.savingService});
 
   @override
-  Widget build(BuildContext context) {
-    if (savingService == null) {
-      return Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
+  _SavingAddScreenState createState() => _SavingAddScreenState();
+}
 
+class _SavingAddScreenState extends State<SavingAddScreen> {
+  final TextEditingController _jumlahTabunganController =
+      TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Tambah Tabungan'),
@@ -54,47 +52,43 @@ class SavingAddScreen extends StatelessWidget {
 
   void _tambahTabungan(BuildContext context) {
     String jumlahTabungan = _jumlahTabunganController.text.trim();
-    if (jumlahTabungan.isNotEmpty && savingService != null) {
+    if (jumlahTabungan.isNotEmpty) {
       int? tabungan = int.tryParse(jumlahTabungan);
       if (tabungan != null) {
-        savingService!.tambahkanTabungan(
+        widget.savingService.tambahkanTabungan(
           tabungan,
           DateTime.now().toString(),
         );
         Navigator.pop(context);
       } else {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: Text('Error'),
-            content: Text('Masukkan angka yang valid untuk jumlah tabungan.'),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text('OK'),
-              ),
-            ],
-          ),
-        );
+        _showErrorDialog(context, 'Masukkan angka yang valid untuk jumlah tabungan.');
       }
     } else {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Error'),
-          content: Text('Jumlah tabungan tidak boleh kosong.'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('OK'),
-            ),
-          ],
-        ),
-      );
+      _showErrorDialog(context, 'Jumlah tabungan tidak boleh kosong.');
     }
+  }
+
+  void _showErrorDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Error'),
+        content: Text(message),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _jumlahTabunganController.dispose();
+    super.dispose();
   }
 }

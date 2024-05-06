@@ -33,23 +33,31 @@ class SavingService {
     }
   }
 
-  // Metode untuk mendapatkan semua tabungan dari API
-  Future<List> getAllTabungan() async {
-    try {
-      final response = await http.get(Uri.parse(apiUrl));
-      if (response.statusCode == 200) {
-        final jsonData = json.decode(response.body);
-        final tabunganList = jsonData != null
-            ? List<SavingModel>.from(
-                jsonData.map((x) => SavingModel.fromJson(x)))
-            : [];
-        return tabunganList;
-      } else {
-        throw Exception('Gagal memuat data tabungan');
-      }
-    } catch (e) {
-      print('Error saat memuat data tabungan: $e');
-      throw Exception('Gagal memuat data tabungan');
+Future<List<SavingModel>> getAllTabungan(String userId) async {
+  try {
+    final response = await http.get(Uri.parse('$apiUrl/$userId'));
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonData = json.decode(response.body);
+      final List<SavingModel> tabunganList = jsonData.map((data) => SavingModel.fromJson(data)).toList();
+      return tabunganList;
+    } else {
+      throw Exception('Failed to load tabungan data');
     }
+  } catch (e) {
+    print('Error loading tabungan data: $e');
+    throw Exception('Failed to load tabungan data');
   }
+}
+
+
+
+
+
+
+
+
+
+
+
+
 }
