@@ -75,21 +75,19 @@ class PackageService {
   }
 
 static Future<String?> getPaketPriceById(String idPackage) async {
-    try {
-      final response = await http.get(Uri.parse('https://papb-wisatapahala-be.vercel.app/packages/$idPackage'));
+  try {
+    final response = await http.get(Uri.parse('https://papb-wisatapahala-be.vercel.app/packages/$idPackage'));
 
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-        final String price = data['harga'].toString(); // Mengonversi nilai harga menjadi String
-        return price;
-      } else {
-        throw Exception('Failed to load package price');
-      }
-    } catch (e) {
-      print('Error in getPaketPriceById: $e');
-      throw Exception('ASUUUU : $e');
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = json.decode(response.body);
+      final String price = data['harga'].toString(); // Mengonversi nilai harga menjadi String
+      return price;
+    } else {
+      throw Exception('Failed to load package price: ${response.statusCode}');
     }
+  } catch (e) {
+    print('Error in getPaketPriceById: $e');
+    throw Exception('Failed to load package price: $e');
   }
-
-
+}
 }
