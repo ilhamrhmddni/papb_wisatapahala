@@ -110,58 +110,88 @@ class _SavingScreenState extends State<SavingScreen> {
     );
   }
 
+
   Widget _buildMainContent() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: Colors.grey,
+  // Cek apakah tabungan saat ini seimbang dengan target tabungan
+  bool isBalance = tabunganSaatIni >= targetTabungan;
+
+  // Jika tabungan saat ini seimbang dengan target tabungan, tampilkan popup
+  if (isBalance) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Tabungan Saat Ini Seimbang"),
+            content: Text("Anda telah mencapai target tabungan."),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text("OK"),
               ),
-              borderRadius: BorderRadius.circular(5),
-            ),
-            padding: EdgeInsets.all(10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  'Tabungan Saat Ini: $tabunganSaatIni',
-                  style: TextStyle(fontSize: 18),
-                ),
-                SizedBox(height: 10),
-                Text(
-                  'Target Tabungan: $targetTabungan',
-                  style: TextStyle(fontSize: 18),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 20),
-          Text(
-            'Riwayat Penambahan Tabungan:',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 10),
-          Expanded(
-            child: ListView.builder(
-              itemCount: riwayatTabungan.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text('Tabungan ke-${index + 1}'),
-                  subtitle: Text(
-                    'Jumlah: ${riwayatTabungan[index].nominal}',
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
+            ],
+          );
+        },
+      );
+    });
   }
+
+  // Selanjutnya, Anda dapat melanjutkan dengan membangun UI seperti biasa
+  return Padding(
+    padding: const EdgeInsets.all(16.0),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: Colors.grey,
+            ),
+            borderRadius: BorderRadius.circular(5),
+          ),
+          padding: EdgeInsets.all(10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                'Tabungan Saat Ini: $tabunganSaatIni',
+                style: TextStyle(fontSize: 18),
+              ),
+              SizedBox(height: 10),
+              Text(
+                'Target Tabungan: $targetTabungan',
+                style: TextStyle(fontSize: 18),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: 20),
+        Text(
+          'Riwayat Penambahan Tabungan:',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        SizedBox(height: 10),
+        Expanded(
+          child: ListView.builder(
+            itemCount: riwayatTabungan.length,
+            itemBuilder: (context, index) {
+              return ListTile(
+                title: Text('Tabungan ke-${index + 1}'),
+                subtitle: Text(
+                  'Jumlah: ${riwayatTabungan[index].nominal}',
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+
 
   Widget _buildLoadingIndicator() {
     return Center(
