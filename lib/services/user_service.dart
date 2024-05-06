@@ -82,15 +82,8 @@ static Future<String?> getSavedPackageId(String userId) async {
 
     if (response.statusCode == 200) {
       final responseData = json.decode(response.body);
-      if (responseData is List) {
-        // Jika respons adalah daftar objek, ambil ID paket dari objek pertama
-        return responseData[0]['id_package'].toString();
-      } else if (responseData is Map<String, dynamic>) {
-        // Jika respons adalah objek tunggal, langsung ambil ID paket
-        return responseData['id_package'].toString();
-      } else {
-        throw Exception('Invalid response format');
-      }
+      // Mengambil langsung ID paket tanpa perlu mengecek tipe data atau mengakses indeks
+      return responseData['id_package'].toString();
     } else {
       print('Failed to load package id: ${response.statusCode}');
       return null;
@@ -100,8 +93,6 @@ static Future<String?> getSavedPackageId(String userId) async {
     return null;
   }
 }
-
-
 
   static Future<String?> getUserId() async {
     try {
