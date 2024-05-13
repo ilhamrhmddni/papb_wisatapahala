@@ -12,74 +12,92 @@ class PackageWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      child: Card(
-        shape: RoundedRectangleBorder( // Membuat kotak yang dibulatkan (rounded)
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: ListTile(
-          contentPadding: EdgeInsets.all(12), // Padding di dalam kotak Card
-          title: Row( // Widget Row untuk menampilkan teks "nama" dan "jenis" secara horizontal
-            mainAxisAlignment: MainAxisAlignment.spaceBetween, // Menempatkan teks "nama" di kiri dan "jenis" di kanan
-            children: [
-              Text(
-                paketUmroh.nama,
-                style: TextStyle(fontSize: 16), // Mengatur ukuran font
-              ), // Teks "nama"
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2), // Padding pada border jenis
-                decoration: BoxDecoration( // Menambahkan border jenis
-                  border: Border.all(color: Colors.grey), // Warna border
-                  borderRadius: BorderRadius.circular(10), // Membuat border yang dibulatkan (rounded)
-                ),
-                child: Text(
-                  paketUmroh.jenis,
-                  style: TextStyle(fontSize: 12), // Mengatur ukuran font
-                ), // Teks "jenis"
-              ),
-            ],
+      child: Padding(
+        padding: const EdgeInsets.all(0), // Padding di sekitar setiap card
+        child: Card(
+          color: Color(0xFF00AD9A),
+          margin: EdgeInsets.zero, // Menghapus margin card
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
           ),
-          subtitle: Column( // Widget Column untuk menampilkan teks lainnya secara vertikal
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 4), // Spasi antara teks
-              Row( // Menampilkan tanggal keberangkatan dan tanggal kepulangan secara sejajar
-                children: [
-                  Text(
-                    'Tanggal Keberangkatan: ${DateFormat('dd MMMM yyyy').format(paketUmroh.tanggalKepergian)}',
-                    style: TextStyle(fontSize: 14), // Mengatur ukuran font
+          child: Padding(
+            padding: const EdgeInsets.all(12), // Padding di dalam card
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  margin: EdgeInsets.only(right: 12.0), // Tambahkan margin di sebelah kanan gambar
+                  width: 125, // Lebar gambar
+                  height: 125, // Tinggi gambar
+                  decoration: BoxDecoration(
+                    color: Colors.white, // Warna latar belakang untuk gambar
+                    borderRadius: BorderRadius.circular(8), // Bentuk border gambar
                   ),
-                ],
-              ),
-              SizedBox(height: 4), // Spasi antara teks
-              Row( // Menampilkan tanggal keberangkatan dan tanggal kepulangan secara sejajar
-                children: [
-                  Text(
-                    'Tanggal Kepulangan: ${DateFormat('dd MMMM yyyy').format(paketUmroh.tanggalKepulangan)}',
-                    style: TextStyle(fontSize: 14), // Mengatur ukuran font
+                  // Tambahkan gambar di sini, misalnya:
+                  // child: Image.asset('assets/images/paket_umroh.jpg', fit: BoxFit.cover),
+                ),
+                SizedBox(width: 12), // Tambahkan jarak antara gambar dan teks
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 8), // Tambahkan jarak di atas teks pertama
+                      Text(
+                        paketUmroh.nama,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 15.4, // 28 * 0.55
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w700,
+                          height: 0,
+                        ),
+                      ),
+                      SizedBox(height: 8), // Tambahkan jarak antara nama dan tanggal
+                      Text(
+                        '${DateFormat('dd MMMM yyyy').format(paketUmroh.tanggalKepergian)} - ${DateFormat('dd MMMM yyyy').format(paketUmroh.tanggalKepulangan)}',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 13, // 25.2 * 0.55
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w500,
+                          height: 0,
+                        ),
+                      ),
+                      SizedBox(height: 8), // Tambahkan jarak antara tanggal dan jenis
+                      Container(
+                        padding: EdgeInsets.all(4), // Padding di sekitar teks jenis
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.white), // Tambahkan border
+                          borderRadius: BorderRadius.circular(4), // Bentuk border
+                        ),
+                        child: Text(
+                          paketUmroh.jenis,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 11.814, // 21.48 * 0.55
+                            fontFamily: 'Inter',
+                            fontWeight: FontWeight.w500,
+                            height: 0,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 8), // Tambahkan jarak antara jenis dan harga
+                      Text(
+                        NumberFormat.currency(locale: 'id', symbol: 'Rp', decimalDigits: 0).format(paketUmroh.harga),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 21.56, // 39.2 * 0.55
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w700,
+                          height: 0,
+                        ),
+                      ),
+                      SizedBox(height: 8), // Tambahkan jarak di bawah harga
+                    ],
                   ),
-                ],
-              ),
-              SizedBox(height: 4), // Spasi antara teks
-              Row( // Menampilkan harga
-                children: [
-                  Text(
-                    'Harga: ',
-                    style: TextStyle(fontSize: 14), // Mengatur ukuran font
-                  ),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2), // Padding pada border harga
-                    decoration: BoxDecoration( // Menambahkan border harga
-                      border: Border.all(color: Colors.grey), // Warna border
-                      borderRadius: BorderRadius.circular(10), // Membuat border yang dibulatkan (rounded)
-                    ),
-                    child: Text(
-                      NumberFormat.currency(locale: 'id', symbol: 'Rp', decimalDigits: 0).format(paketUmroh.harga),
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold), // Mengatur ukuran font dan membuat teks tebal (bold)
-                    ),
-                  ),
-                ],
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

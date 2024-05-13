@@ -44,29 +44,36 @@ class PackageService {
   }
 
   // Menyimpan ID paket yang dipilih oleh pengguna ke dalam penyimpanan lokal
-  static Future<PackageModel> saveSelectedPackageId(String idPackage) async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('id_package', idPackage);
-      
-      // Membuat objek PackageModel dengan menggunakan idPackage yang diberikan
+static Future<PackageModel> saveSelectedPackageId(String idPackage) async {
+  try {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('id_package', idPackage);
+
+    final response = await http.get(Uri.parse('https://papb-wisatapahala-be.vercel.app/packages/$idPackage'));
+
+    if (response.statusCode == 200) {
+      final responseData = jsonDecode(response.body);
       PackageModel packageModel = PackageModel(
-        id: idPackage,
-        nama: '', // Isi dengan nama paket yang sesuai jika ada
-        jenis: '', // Isi dengan jenis paket yang sesuai jika ada
-        tanggalKepulangan: DateTime.now(), // Isi dengan tanggal kepulangan yang sesuai jika ada
-        tanggalKepergian: DateTime.now(), // Isi dengan tanggal kepergian yang sesuai jika ada
-        harga: 0, // Isi dengan harga paket yang sesuai jika ada
-        detail: '', // Isi dengan detail paket yang sesuai jika ada
+        id: responseData['id'] ?? '', // Handle nilai null dengan memberikan nilai default
+        nama: responseData['nama'] ?? '', // Handle nilai null dengan memberikan nilai default
+        jenis: responseData['jenis'] ?? '', // Handle nilai null dengan memberikan nilai default
+        tanggalKepulangan: responseData['tanggalKepulangan'] != null ? DateTime.parse(responseData['tanggalKepulangan']) : DateTime.now(), // Handle nilai null dengan memberikan nilai default atau tanggal saat ini
+        tanggalKepergian: responseData['tanggalKepergian'] != null ? DateTime.parse(responseData['tanggalKepergian']) : DateTime.now(), // Handle nilai null dengan memberikan nilai default atau tanggal saat ini
+        harga: responseData['harga'] ?? 0, // Handle nilai null dengan memberikan nilai default
+        detail: responseData['detail'] ?? '', // Handle nilai null dengan memberikan nilai default
       );
-      
-      // Mengembalikan objek PackageModel yang telah dibuat
+
       return packageModel;
-    } catch (e) {
-      // Jika terjadi kesalahan, lemparkan exception dengan pesan yang sesuai
-      throw Exception('Error: Failed to save selected package ID');
+    } else {
+      throw Exception('Failed to load package details: ${response.reasonPhrase}');
     }
+  } catch (e) {
+    throw Exception('Error: Failed to save and fetch selected package ID: $e');
   }
+}
+
+
+
 
   // Mendapatkan ID paket yang dipilih dari penyimpanan lokal
   static Future<String?> getSelectedPackageId() async {
@@ -90,4 +97,23 @@ static Future<String?> getPaketPriceById(String idPackage) async {
     throw Exception('Failed to load package price: $e');
   }
 }
+
+static Future<PackageModel> getPackageById(String idPackage) async {
+  try {
+    final response = await http.get(Uri.parse('https://papb-wisatapahala-be.vercel.app/packages/$idPackage'));
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = json.decode(response.body);
+      final PackageModel package = PackageModel.fromJson(data); // Mengonversi data JSON menjadi objek PackageModel
+      return package;
+    } else {
+      throw Exception('Failed to load package: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Error in getPaketById: $e');
+    throw Exception('Failed to load package: $e');
+  }
+}
+
+
 }

@@ -55,13 +55,18 @@ class _SavingAddScreenState extends State<SavingAddScreen> {
     if (jumlahTabungan.isNotEmpty) {
       int? tabungan = int.tryParse(jumlahTabungan);
       if (tabungan != null) {
+        // Ambil tanggal dan waktu saat ini
+        DateTime now = DateTime.now();
+        // Format tanggal dan waktu menjadi string
+        String waktu = now.toString();
         widget.savingService.tambahkanTabungan(
           tabungan,
-          DateTime.now().toString(),
+          waktu,
         );
         Navigator.pop(context);
       } else {
-        _showErrorDialog(context, 'Masukkan angka yang valid untuk jumlah tabungan.');
+        _showErrorDialog(
+            context, 'Masukkan angka yang valid untuk jumlah tabungan.');
       }
     } else {
       _showErrorDialog(context, 'Jumlah tabungan tidak boleh kosong.');
@@ -92,3 +97,4 @@ class _SavingAddScreenState extends State<SavingAddScreen> {
     super.dispose();
   }
 }
+

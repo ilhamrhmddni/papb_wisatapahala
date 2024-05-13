@@ -37,49 +37,132 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
+        backgroundColor: Color(0xFF00AD9A),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'Login',
-              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+      body: Container(
+        width: screenWidth,
+        height: screenHeight,
+        color: Colors.white,
+        child: Stack(
+          children: [
+            Positioned(
+              left: 0,
+              top: 0,
+              child: Container(
+                width: screenWidth,
+                height: screenHeight * 0.35,
+                decoration: BoxDecoration(
+                  color: Color(0xFF00AD9A),
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(screenHeight * 0.06),
+                    bottomRight: Radius.circular(screenHeight * 0.06),
+                  ),
+                ),
+              ),
             ),
-            SizedBox(height: 20),
-            TextField(
-              controller: emailController,
-              decoration: InputDecoration(labelText: 'Email'),
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Email',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: screenWidth * 0.035,
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Container(
+                        width: screenWidth * 0.8,
+                        child: TextField(
+                          controller: emailController,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Color(0xFF00AD9A)),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Color(0xFF00AD9A)),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 24), // Jarak ke bawah setelah email
+                    ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Password',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: screenWidth * 0.035,
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Container(
+                        width: screenWidth * 0.8,
+                        child: TextField(
+                          controller: passwordController,
+                          obscureText: true,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Color(0xFF00AD9A)),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Color(0xFF00AD9A)),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 24), // Jarak ke bawah setelah password
+                    ],
+                  ),
+                  SizedBox(height: 24), // Jarak ke bawah setelah tombol Login
+                  ElevatedButton(
+                    onPressed: () => _login(context),
+                    child: Text('Login'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF00AD9A),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 48, vertical: 16), // Atur padding tombol
+                    ),
+                  ),
+                ],
+              ),
             ),
-            TextField(
-              controller: passwordController,
-              decoration: InputDecoration(labelText: 'Password'),
-              obscureText: true,
+            Positioned(
+              bottom: 16,
+              left: 16,
+              child: TextButton(
+                onPressed: () {
+                  // Navigasi ke layar pendaftaran saat tombol ditekan
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => RegisterScreen()),
+                  );
+                },
+                child: Text('Belum punya akun? Daftar di sini'),
+              ),
             ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () => _login(context), // Panggil fungsi login saat tombol ditekan
-              child: Text('Login'),
-            ),
-            SizedBox(height: 10),
           ],
-        ),
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16.0),
-        child: TextButton(
-          onPressed: () {
-            // Navigasi ke layar pendaftaran saat tombol ditekan
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => RegisterScreen()),
-            );
-          },
-          child: Text('Belum punya akun? Daftar di sini'),
         ),
       ),
     );

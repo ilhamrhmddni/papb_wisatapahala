@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wisatapahala/models/package_model.dart';
 import 'package:wisatapahala/models/saving_model.dart';
@@ -6,11 +7,13 @@ import 'package:wisatapahala/screens/package_screen.dart';
 import 'package:wisatapahala/screens/saving_add_screen.dart';
 import 'package:wisatapahala/services/package_service.dart';
 import 'package:wisatapahala/services/saving_service.dart';
+import 'package:wisatapahala/services/user_service.dart';
 
 class SavingScreen extends StatefulWidget {
   final PackageModel packageModel;
+  final String idPackage;
 
-  SavingScreen({required this.packageModel, String? idPackage});
+  SavingScreen({required this.packageModel, required this.idPackage});
 
   @override
   _SavingScreenState createState() => _SavingScreenState();
@@ -24,7 +27,6 @@ class _SavingScreenState extends State<SavingScreen> {
   // ignore: unused_field
   bool _dataLoaded = false;
 
-
   @override
   void initState() {
     super.initState();
@@ -32,47 +34,44 @@ class _SavingScreenState extends State<SavingScreen> {
   }
 
   Future<void> _initializeAndLoadData() async {
-    print("Initializing and loading data..."); // Tambahkan print statement
+    print("Initializing and loading data...");
     try {
-      // Mendapatkan id paket yang dipilih
-      String? idPackage = await PackageService.getSelectedPackageId();
-      if (idPackage != null) {
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        String? userId = prefs.getString('id_user');
-        if (userId != null) {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? userId = prefs.getString('id_user');
+      String? idPackage = prefs.getString('id_package');
+      if (userId != null && idPackage != null) {
+        setState(() {
+          savingService = SavingService(userId);
+        });
+        print("Selected user ID: $userId");
+        print("Selected package ID: $idPackage");
+
+        String? price = await PackageService.getPaketPriceById(idPackage);
+        if (price != null) {
           setState(() {
-            savingService = SavingService(userId);
+            targetTabungan = int.parse(price);
           });
-          print("Selected user ID: $userId"); // Tambahkan print statement
-          print("Selected package ID: $idPackage"); // Tambahkan print statement
-
-          // Mengambil harga paket berdasarkan id
-          String? price = await PackageService.getPaketPriceById(idPackage);
-          if (price != null) {
-            setState(() {
-              targetTabungan = int.parse(price);
-            });
-            print("Package price: $price"); // Tambahkan print statement
-          } else {
-            print('Error: price is null');
-            return;
-          }
-
-          if (savingService != null) {
-            List<SavingModel> rawData = await savingService!.getAllTabungan(userId);
-            setState(() {
-              riwayatTabungan = rawData;
-              tabunganSaatIni = _calculateTotalSaving();
-              _dataLoaded = true; // Tandai bahwa data sudah dimuat
-            });
-            print("Total savings: $tabunganSaatIni"); // Tambahkan print statement
-            _checkIsBalance(); // Tambahkan pengecekan isBalance
-          } else {
-            print('Error: userId is null');
-          }
+          print("Package price: $price");
         } else {
-          print('Error: idPackage is null');
+          print('Error: price is null');
+          return;
         }
+
+        if (savingService != null) {
+          List<SavingModel> rawData =
+              await savingService!.getAllTabungan(userId);
+          setState(() {
+            riwayatTabungan = rawData;
+            tabunganSaatIni = _calculateTotalSaving();
+            _dataLoaded = true;
+          });
+          print("Total savings: $tabunganSaatIni");
+          _checkIsBalance();
+        } else {
+          print('Error: userId is null');
+        }
+      } else {
+        print('Error: userId or idPackage is null');
       }
     } catch (e) {
       print('Error: $e');
@@ -87,17 +86,14 @@ class _SavingScreenState extends State<SavingScreen> {
     return total;
   }
 
-  // Fungsi untuk memperbarui data pada layar SavingScreen
   Future<void> refreshData() async {
-    print("Refreshing data..."); // Tambahkan print statement
-    _initializeAndLoadData(); // Memuat ulang data pada layar SavingScreen
+    print("Refreshing data...");
+    _initializeAndLoadData();
   }
 
   void _checkIsBalance() {
-    // Cek apakah tabungan saat ini seimbang dengan target tabungan
     bool isBalance = tabunganSaatIni >= targetTabungan;
 
-    // Jika tabungan saat ini seimbang dengan target tabungan, tampilkan popup
     if (isBalance) {
       showDialog(
         context: context,
@@ -120,63 +116,229 @@ class _SavingScreenState extends State<SavingScreen> {
   }
 
   Widget _buildMainContent() {
-    // Selanjutnya, Anda dapat melanjutkan dengan membangun UI seperti biasa
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Container(
+    double percentage = (tabunganSaatIni / targetTabungan) * 100;
+    return Stack(
+      children: [
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: Container(
+            padding: EdgeInsets.all(8),
+            margin: EdgeInsets.all(12),
             decoration: BoxDecoration(
-              border: Border.all(
-                color: Colors.grey,
-              ),
-              borderRadius: BorderRadius.circular(5),
+              color:
+                  Color(0xFF00AD9A), // Pindahkan warna ke dalam BoxDecoration
+              borderRadius:
+                  BorderRadius.circular(10), // Tambahkan border radius di sini
             ),
-            padding: EdgeInsets.all(10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  'Tabungan Saat Ini: $tabunganSaatIni',
-                  style: TextStyle(fontSize: 18),
-                ),
-                SizedBox(height: 10),
-                Text(
-                  'Target Tabungan: $targetTabungan',
-                  style: TextStyle(fontSize: 18),
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        margin: EdgeInsets.only(right: 12.0),
+                        width: 125,
+                        height: 125,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.packageModel.nama,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15.4,
+                                fontFamily: 'Inter',
+                                fontWeight: FontWeight.w700,
+                                height: 0,
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              '${DateFormat('dd MMMM yyyy').format(widget.packageModel.tanggalKepergian)} - ${DateFormat('dd MMMM yyyy').format(widget.packageModel.tanggalKepulangan)}',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 13,
+                                fontFamily: 'Inter',
+                                fontWeight: FontWeight.w500,
+                                height: 0,
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Container(
+                              padding: EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.white),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                widget.packageModel.jenis,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11.814,
+                                  fontFamily: 'Inter',
+                                  fontWeight: FontWeight.w500,
+                                  height: 0,
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              NumberFormat.currency(
+                                locale: 'id',
+                                symbol: 'Rp',
+                                decimalDigits: 0,
+                              ).format(widget.packageModel.harga),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 21.56,
+                                fontFamily: 'Inter',
+                                fontWeight: FontWeight.w700,
+                                height: 0,
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
-          SizedBox(height: 20),
-          Text(
-            'Riwayat Penambahan Tabungan:',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 10),
-          Expanded(
-            child: ListView.builder(
-              itemCount: riwayatTabungan.length,
-              itemBuilder: (context, index) {
-                final savingModel = riwayatTabungan[index];
-                return ListTile(
-                  title: Text('Tabungan ke-${index + 1}'),
-                  subtitle: Text(
-                    'Jumlah: ${riwayatTabungan[index].nominal}',
+        ),
+        Positioned.fill(
+          top: 185, // Atur nilai ini sesuai dengan preferensi tata letak Anda
+          child: Container(
+            padding: EdgeInsets.all(16.0),
+            margin:
+                const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 72.0),
+            decoration: BoxDecoration(
+              color: Color(0xFF00AD9A),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(5),
                   ),
-                  trailing: IconButton(
-                    icon: Icon(Icons.delete),
-                    onPressed: () {
-                      _deleteSaving(savingModel);
+                  padding: EdgeInsets.all(16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            '${NumberFormat.currency(locale: 'id', symbol: 'Rp', decimalDigits: 0).format(tabunganSaatIni)}',
+                            style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF00AD9A)),
+                          ),
+                          Text(
+                            '/  ${NumberFormat.currency(locale: 'id', symbol: 'Rp', decimalDigits: 0).format(targetTabungan)}',
+                            style: TextStyle(
+                                fontSize: 15, color: Color(0xFF00AD9A)),
+                          ),
+                        ],
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Color(0xFF00AD9A),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        padding: EdgeInsets.all(12),
+                        child: Text(
+                          '${percentage.toStringAsFixed(0)}%',
+                          style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 20),
+                Text(
+                  'Catatan Tabungan :',
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
+                ),
+                SizedBox(height: 20),
+                Expanded(
+                  child: ListView.builder(
+                    padding: EdgeInsets.all(2.0),
+                    itemCount: riwayatTabungan.length,
+                    itemBuilder: (context, index) {
+                      final savingModel = riwayatTabungan[index];
+                      final formattedDateTime = DateFormat('dd-MM-yy HH:mm')
+                          .format(savingModel.waktu);
+                      return Container(
+                        alignment: Alignment.center,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              NumberFormat.currency(
+                                locale: 'id',
+                                symbol: 'Rp',
+                                decimalDigits: 0,
+                              ).format(riwayatTabungan[index].nominal),
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            Container(
+                              alignment: Alignment.center,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    '${formattedDateTime}',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.delete),
+                                    color: Colors.white,
+                                    onPressed: () {
+                                      _deleteSaving(savingModel);
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
                     },
                   ),
-                );
-              },
+                ),
+              ],
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -184,12 +346,10 @@ class _SavingScreenState extends State<SavingScreen> {
     try {
       bool success = await savingService!.deleteSaving(savingModel.id);
       if (success) {
-        // Hapus tabungan dari daftar riwayat
         setState(() {
           riwayatTabungan.removeWhere((item) => item.id == savingModel.id);
-          tabunganSaatIni = _calculateTotalSaving(); // Perbarui total tabungan saat ini
+          tabunganSaatIni = _calculateTotalSaving();
         });
-        // Cek apakah tabungan saat ini seimbang dengan target tabungan
         bool isBalance = tabunganSaatIni >= targetTabungan;
         if (isBalance) {
           _checkIsBalance();
@@ -208,40 +368,112 @@ class _SavingScreenState extends State<SavingScreen> {
     );
   }
 
- @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false, // Menonaktifkan tombol kembali di kiri atas
-        title: Text('Kelola Tabungan'),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.swap_horiz),
+        backgroundColor: const Color(0xFF00AD9A),
+        title: Text(
+          'Tabungan Anda',
+          style: TextStyle(color: Colors.white),
+        ),
+        leading: Builder(
+          // Gunakan Builder di sini
+          builder: (context) => IconButton(
+            icon: Icon(Icons.menu), // Icon hamburger
             onPressed: () {
-              _showConfirmationDialog(context);
+              Scaffold.of(context)
+                  .openDrawer(); // Tampilkan drawer saat ditekan
             },
           ),
-        ],
+        ),
       ),
-      body: savingService != null ? _buildMainContent() : _buildLoadingIndicator(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          if (savingService != null) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => SavingAddScreen(savingService: savingService!),
-              ),
-            ).then((_) {
-              // Setelah kembali dari SavingAddScreen, panggil refreshData() untuk memperbarui data
-              refreshData();
-            });
-          }
+      drawer: Drawer(
+  child: ListView(
+    padding: EdgeInsets.zero,
+    children: <Widget>[
+      UserAccountsDrawerHeader(
+        accountName: Text(
+          widget.packageModel.nama,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        accountEmail: Text(
+          widget.packageModel.jenis,
+          style: TextStyle(
+            fontSize: 16,
+          ),
+        ),
+        currentAccountPicture: CircleAvatar(
+          // Di sini Anda dapat menambahkan gambar profil pengguna
+          backgroundColor: Colors.white,
+          child: Text(
+            'A', // Inisial nama pengguna
+            style: TextStyle(
+              fontSize: 40,
+              color: const Color(0xFF00AD9A),
+            ),
+          ),
+        ),
+        decoration: BoxDecoration(
+          color: const Color(0xFF00AD9A),
+        ),
+      ),
+      ListTile(
+        title: Text('Ganti Package'),
+        onTap: () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => PackageScreen()),
+          );
         },
-        backgroundColor: Colors.green,
-        child: Icon(Icons.add),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      Expanded(
+        child: SizedBox(),
+      ),
+      ListTile(
+        title: Text('Logout'),
+        onTap: () {
+          UserService.logoutUser(context);
+        },
+      ),
+    ],
+  ),
+),
+
+      body: savingService != null
+          ? Stack(
+              children: [
+                _buildMainContent(),
+                Positioned(
+                  right: 12.0,
+                  bottom: 10.0,
+                  child: FloatingActionButton(
+                    onPressed: () {
+                      if (savingService != null) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                SavingAddScreen(savingService: savingService!),
+                          ),
+                        ).then((_) {
+                          refreshData();
+                        });
+                      }
+                    },
+                    backgroundColor: Color(0xFF00AD9A),
+                    child: Icon(
+                      Icons.add,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            )
+          : _buildLoadingIndicator(),
     );
   }
 
@@ -264,7 +496,7 @@ class _SavingScreenState extends State<SavingScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => PackageScreen(), // Mengganti dengan PackageScreen
+                    builder: (context) => PackageScreen(),
                   ),
                 );
               },
