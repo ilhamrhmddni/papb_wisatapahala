@@ -274,7 +274,7 @@ class _SavingScreenState extends State<SavingScreen> {
                     ],
                   ),
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 12),
                 Text(
                   'Catatan Tabungan :',
                   style: TextStyle(
@@ -282,7 +282,7 @@ class _SavingScreenState extends State<SavingScreen> {
                       fontWeight: FontWeight.bold,
                       color: Colors.white),
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 12),
                 Expanded(
                   child: ListView.builder(
                     padding: EdgeInsets.all(2.0),
@@ -293,6 +293,7 @@ class _SavingScreenState extends State<SavingScreen> {
                           .format(savingModel.waktu);
                       return Container(
                         alignment: Alignment.center,
+                        padding: EdgeInsets.all(4.0),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -318,13 +319,16 @@ class _SavingScreenState extends State<SavingScreen> {
                                     '${formattedDateTime}',
                                     style: TextStyle(color: Colors.white),
                                   ),
-                                  IconButton(
-                                    icon: Icon(Icons.delete),
-                                    color: Colors.white,
-                                    onPressed: () {
+                                  GestureDetector(
+                                    onDoubleTap: () {
                                       _deleteSaving(savingModel);
                                     },
-                                  ),
+                                    onTap: () {
+                                      _showSnackBar(context);
+                                    },
+                                    child:
+                                        Icon(Icons.delete, color: Colors.white),
+                                  )
                                 ],
                               ),
                             ),
@@ -339,6 +343,15 @@ class _SavingScreenState extends State<SavingScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  void _showSnackBar(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Tap dua kali untuk menghapus'),
+        duration: Duration(seconds: 2),
+      ),
     );
   }
 
@@ -380,7 +393,7 @@ class _SavingScreenState extends State<SavingScreen> {
         leading: Builder(
           // Gunakan Builder di sini
           builder: (context) => IconButton(
-            icon: Icon(Icons.menu), // Icon hamburger
+            icon: Icon(Icons.menu), color: Colors.white, // Icon hamburger
             onPressed: () {
               Scaffold.of(context)
                   .openDrawer(); // Tampilkan drawer saat ditekan
@@ -389,60 +402,65 @@ class _SavingScreenState extends State<SavingScreen> {
         ),
       ),
       drawer: Drawer(
-  child: ListView(
-    padding: EdgeInsets.zero,
-    children: <Widget>[
-      UserAccountsDrawerHeader(
-        accountName: Text(
-          widget.packageModel.nama,
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        accountEmail: Text(
-          widget.packageModel.jenis,
-          style: TextStyle(
-            fontSize: 16,
-          ),
-        ),
-        currentAccountPicture: CircleAvatar(
-          // Di sini Anda dapat menambahkan gambar profil pengguna
-          backgroundColor: Colors.white,
-          child: Text(
-            'A', // Inisial nama pengguna
-            style: TextStyle(
-              fontSize: 40,
-              color: const Color(0xFF00AD9A),
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            UserAccountsDrawerHeader(
+              accountName: Text(
+                widget.packageModel.nama,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              accountEmail: Text(
+                widget.packageModel.jenis,
+                style: TextStyle(
+                  fontSize: 16,
+                ),
+              ),
+              currentAccountPicture: CircleAvatar(
+                // Di sini Anda dapat menambahkan gambar profil pengguna
+                backgroundColor: Colors.white,
+                child: Text(
+                  'A', // Inisial nama pengguna
+                  style: TextStyle(
+                    fontSize: 40,
+                    color: const Color(0xFF00AD9A),
+                  ),
+                ),
+              ),
+              decoration: BoxDecoration(
+                color: const Color(0xFF00AD9A),
+              ),
             ),
-          ),
+            ListTile(
+              title: Text('Ganti Package'),
+              onTap: () {
+                _showConfirmationDialog(context, 'Ganti Package',
+                    'Apakah Anda yakin ingin beralih Paket?', () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => PackageScreen()),
+                  );
+                });
+              },
+            ),
+            Expanded(
+              child: SizedBox(),
+            ),
+            ListTile(
+              title: Text('Logout'),
+              onTap: () {
+                _showConfirmationDialog(
+                    context, 'Logout', 'Apakah Anda yakin ingin logout?', () {
+                  UserService.logoutUser(context);
+                });
+              },
+            ),
+          ],
         ),
-        decoration: BoxDecoration(
-          color: const Color(0xFF00AD9A),
-        ),
       ),
-      ListTile(
-        title: Text('Ganti Package'),
-        onTap: () {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => PackageScreen()),
-          );
-        },
-      ),
-      Expanded(
-        child: SizedBox(),
-      ),
-      ListTile(
-        title: Text('Logout'),
-        onTap: () {
-          UserService.logoutUser(context);
-        },
-      ),
-    ],
-  ),
-),
-
       body: savingService != null
           ? Stack(
               children: [
@@ -477,19 +495,24 @@ class _SavingScreenState extends State<SavingScreen> {
     );
   }
 
-  void _showConfirmationDialog(BuildContext context) {
+  void _showConfirmationDialog(
+    BuildContext context,
+    String title,
+    String content,
+    Function() onConfirm,
+  ) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Konfirmasi"),
-          content: Text("Apakah Anda yakin ingin beralih ke layar paket?"),
+          title: Text(title),
+          content: Text(content),
           actions: <Widget>[
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text("Batal"),
+              child: Text("Batal", style: TextStyle(color: Colors.black)),
             ),
             TextButton(
               onPressed: () {
@@ -500,7 +523,10 @@ class _SavingScreenState extends State<SavingScreen> {
                   ),
                 );
               },
-              child: Text("Ya"),
+              child: Text(
+                "Ya",
+                style: TextStyle(color: Colors.black),
+              ),
             ),
           ],
         );

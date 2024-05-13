@@ -104,7 +104,9 @@ static Future<PackageModel> getPackageById(String idPackage) async {
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> data = json.decode(response.body);
-      final PackageModel package = PackageModel.fromJson(data); // Mengonversi data JSON menjadi objek PackageModel
+      final PackageModel package = PackageModel.fromJson(data); 
+      print(package);
+      // Mengonversi data JSON menjadi objek PackageModel
       return package;
     } else {
       throw Exception('Failed to load package: ${response.statusCode}');

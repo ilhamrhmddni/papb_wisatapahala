@@ -105,6 +105,30 @@ class PackageScreen extends StatelessWidget {
     return decodedToken['user']['id'];
   }
 
+  void navigateToSavingScreenWithPackage(BuildContext context, String idPackage) async {
+  try {
+    // Ambil data paket dari database menggunakan idPackage
+    PackageModel package = await PackageService.getPackageById(idPackage);
+
+    // Navigasi ke SavingScreen dengan data paket yang telah diambil
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SavingScreen(
+          idPackage: idPackage,
+          packageModel: package,
+        ),
+      ),
+    );
+  } catch (error) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('Error: Failed to load package details: $error'),
+    ));
+  }
+}
+
+
+
   Future<bool?> _showConfirmationDialog(BuildContext context, PackageModel packageModel) async {
     return showDialog<bool>(
       context: context,
