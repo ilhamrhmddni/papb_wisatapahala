@@ -38,131 +38,107 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: Color(0xFF00AD9A),
       ),
-      body: Container(
-        width: screenWidth,
-        height: screenHeight,
-        color: Colors.white,
-        child: Stack(
-          children: [
-            Positioned(
-              left: 0,
-              top: 0,
-              child: Container(
-                width: screenWidth,
-                height: screenHeight * 0.35,
-                decoration: BoxDecoration(
-                  color: Color(0xFF00AD9A),
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(screenHeight * 0.06),
-                    bottomRight: Radius.circular(screenHeight * 0.06),
+      body: SingleChildScrollView(
+        child: Container(
+          width: screenWidth,
+          color: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                'Login',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+              SizedBox(height: 24),
+              Text(
+                'Email',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black,
+                ),
+              ),
+              SizedBox(height: 8),
+              TextField(
+                controller: emailController,
+                decoration: InputDecoration(
+                  contentPadding: EdgeInsets.symmetric(
+                      vertical: 10.0), // Atur tinggi TextField
+                  border: OutlineInputBorder(),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF00AD9A)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF00AD9A)),
                   ),
                 ),
               ),
-            ),
-            Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Email',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: screenWidth * 0.035,
-                          fontFamily: 'Inter',
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Container(
-                        width: screenWidth * 0.8,
-                        child: TextField(
-                          controller: emailController,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Color(0xFF00AD9A)),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Color(0xFF00AD9A)),
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 24), // Jarak ke bawah setelah email
-                    ],
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Password',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: screenWidth * 0.035,
-                          fontFamily: 'Inter',
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Container(
-                        width: screenWidth * 0.8,
-                        child: TextField(
-                          controller: passwordController,
-                          obscureText: true,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Color(0xFF00AD9A)),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Color(0xFF00AD9A)),
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 24), // Jarak ke bawah setelah password
-                    ],
-                  ),
-                  SizedBox(height: 24), // Jarak ke bawah setelah tombol Login
-                  ElevatedButton(
-                    onPressed: () => _login(context),
-                    child: Text('Login'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF00AD9A),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      padding: EdgeInsets.symmetric(horizontal: 48, vertical: 16), // Atur padding tombol
-                    ),
-                  ),
-                ],
+              SizedBox(height: 16),
+              Text(
+                'Password',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black,
+                ),
               ),
-            ),
-            Positioned(
-              bottom: 16,
-              left: 16,
-              child: TextButton(
+              SizedBox(height: 8),
+              TextField(
+                controller: passwordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  contentPadding: EdgeInsets.symmetric(
+                      vertical: 10.0), // Atur tinggi TextField
+                  border: OutlineInputBorder(),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF00AD9A)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF00AD9A)),
+                  ),
+                ),
+              ),
+              SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => _login(context),
+                child: Text(
+                  'Login',
+                  style: TextStyle(color: Colors.white),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFF00AD9A),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                ),
+              ),
+              SizedBox(height: 16),
+              TextButton(
                 onPressed: () {
-                  // Navigasi ke layar pendaftaran saat tombol ditekan
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => RegisterScreen()),
                   );
                 },
-                child: Text('Belum punya akun? Daftar di sini'),
+                child: Text(
+                  'Belum punya akun? Daftar di sini',
+                  style: TextStyle(color: Colors.black),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -44,84 +44,75 @@ class RegisterScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: Color(0xFF00AD9A),
       ),
-      body: Container(
-        width: screenWidth,
-        height: screenHeight,
-        color: Colors.white,
-        child: Stack(
-          children: [
-            Positioned(
-              left: 0,
-              top: 0,
-              child: Container(
-                width: screenWidth,
-                height: screenHeight * 0.35,
-                decoration: BoxDecoration(
-                  color: Color(0xFF00AD9A),
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(screenHeight * 0.06),
-                    bottomRight: Radius.circular(screenHeight * 0.06),
+      body: SingleChildScrollView(
+        child: Container(
+          width: screenWidth,
+          color: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                'Register',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+              SizedBox(height: 24),
+              _buildTextField(
+                screenWidth,
+                'Username',
+                _usernameController,
+              ),
+              _buildTextField(
+                screenWidth,
+                'Email',
+                _emailController,
+              ),
+              _buildTextField(
+                screenWidth,
+                'Password',
+                _passwordController,
+                isPassword: true,
+              ),
+              SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () => _register(context),
+                child: Text(
+                  'Register',
+                  style: TextStyle(color: Colors.white),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFF00AD9A),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
                   ),
+                  padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                 ),
               ),
-            ),
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      'Register',
-                      style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 20),
-                    _buildTextField(
-                      screenWidth,
-                      'Username',
-                      _usernameController,
-                    ),
-                    _buildTextField(
-                      screenWidth,
-                      'Email',
-                      _emailController,
-                    ),
-                    _buildTextField(
-                      screenWidth,
-                      'Password',
-                      _passwordController,
-                      isPassword: true,
-                    ),
-                    SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: () => _register(context),
-                      child: Text('Register'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: 16,
-              left: 16,
-              child: TextButton(
+              SizedBox(height: 16),
+              TextButton(
                 onPressed: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => LoginScreen()),
                   );
                 },
-                child: Text('Sudah punya akun? Masuk di sini'),
+                child: Text(
+                  'Sudah punya akun? Masuk di sini',
+                  style: TextStyle(color: Colors.black),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -129,7 +120,7 @@ class RegisterScreen extends StatelessWidget {
 
   Widget _buildTextField(double screenWidth, String label, TextEditingController controller, {bool isPassword = false}) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
           label,
@@ -142,7 +133,7 @@ class RegisterScreen extends StatelessWidget {
         ),
         SizedBox(height: 8),
         Container(
-          width: screenWidth * 0.8,
+          height: 48,
           child: TextField(
             controller: controller,
             obscureText: isPassword,
@@ -157,6 +148,7 @@ class RegisterScreen extends StatelessWidget {
             ),
           ),
         ),
+        SizedBox(height: 16),
       ],
     );
   }

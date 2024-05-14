@@ -125,18 +125,14 @@ static Future<void> loginUser(
 
   static Future<void> logoutUser(BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isLoggedIn', false);
+    await prefs.clear(); // Hapus semua data di SharedPreferences
 
-    // Pastikan konteks masih valid sebelum melakukan navigasi
-    if (Navigator.canPop(context)) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => LoginScreen()),
-      );
-    } else {
-      print("Konteks tidak valid, tidak bisa melakukan navigasi.");
-    }
+    // Navigasi ke LoginScreen
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (context) => LoginScreen()),
+    );
   }
+
 
   static Future<bool> checkLoginStatus() async {
     try {

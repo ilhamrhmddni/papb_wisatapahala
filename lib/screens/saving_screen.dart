@@ -500,37 +500,41 @@ class _SavingScreenState extends State<SavingScreen> {
     String title,
     String content,
     Function() onConfirm,
-  ) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(title),
-          content: Text(content),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text("Batal", style: TextStyle(color: Colors.black)),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.push(
+    {bool isLogout = false}) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text(title),
+        content: Text(content),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text("Batal", style: TextStyle(color: Colors.black)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Close the dialog
+              onConfirm();
+              if (isLogout) {
+                UserService.logoutUser(context); // Logout and navigate to LoginScreen
+              } else {
+                Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => PackageScreen(),
-                  ),
+                  MaterialPageRoute(builder: (context) => PackageScreen()),
                 );
-              },
-              child: Text(
-                "Ya",
-                style: TextStyle(color: Colors.black),
-              ),
+              }
+            },
+            child: Text(
+              "Ya",
+              style: TextStyle(color: Colors.black),
             ),
-          ],
-        );
-      },
-    );
-  }
+          ),
+        ],
+      );
+    },
+  );
+}
 }
